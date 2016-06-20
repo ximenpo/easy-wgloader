@@ -59,7 +59,6 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 			m_pWeb->Stop();
 			m_pWeb->Release(); 
 		}
-		m_ctrlWeb.DestroyWindow();
 	}
 
 	bHandled	= FALSE;

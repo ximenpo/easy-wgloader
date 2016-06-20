@@ -81,6 +81,7 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DlgGame.h" />
     <ClInclude Include="DlgLogin.h" />
     <ClInclude Include="easy-wgloader.h" />
     <ClInclude Include="Resource.h" />
@@ -88,6 +89,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DlgGame.cpp" />
     <ClCompile Include="DlgLogin.cpp" />
     <ClCompile Include="easy-wgloader.cpp" />
     <ClCompile Include="stdafx.cpp">

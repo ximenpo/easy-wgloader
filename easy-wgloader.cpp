@@ -3,7 +3,9 @@
 
 #include "stdafx.h"
 #include "easy-wgloader.h"
+
 #include "DlgLogin.h"
+#include "DlgGame.h"
 
 #define MAX_LOADSTRING 100
 
@@ -40,6 +42,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		//	game
 		{
+			GameDialog	dlg;
+			dlg.DoModal(NULL);
 		}
 	}while(true);
 
