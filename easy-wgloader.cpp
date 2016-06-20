@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "easy-wgloader.h"
+#include "DlgLogin.h"
 
 #define MAX_LOADSTRING 100
 
@@ -14,9 +15,9 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
 // 此代码模块中包含的函数的前向声明:
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
+	HINSTANCE hPrevInstance,
+	LPTSTR    lpCmdLine,
+	int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -27,6 +28,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	_Module.Init(NULL, hInstance);
 
+	do
+	{
+		//	login
+		{
+			LoginDialog	dlg;
+			if(dlg.DoModal(NULL) == IDCANCEL){
+				break;
+			}
+		}
+
+		//	game
+		{
+		}
+	}while(true);
 
 	_Module.Term();
 
