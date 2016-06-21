@@ -23,6 +23,6 @@
 //#include <atlstr.h>
 #include <atlcom.h>
 #include <atlwin.h>
-extern	CComModule	_Module; 
 
-// TODO: 在此处引用程序需要的其他头文件
+// 在此处引用程序需要的其他头文件
+#include	"simple/stringify.h"

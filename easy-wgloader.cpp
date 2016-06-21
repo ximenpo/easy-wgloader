@@ -7,14 +7,9 @@
 #include "DlgLogin.h"
 #include "DlgGame.h"
 
-#define MAX_LOADSTRING 100
+#include <fstream>
 
-// 全局变量:
-HINSTANCE hInst;								// 当前实例
-TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
-TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
-
-// 此代码模块中包含的函数的前向声明:
+#include "simple/app.h"
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -24,11 +19,30 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// 初始化全局字符串
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_EASYWGLOADER, szWindowClass, MAX_LOADSTRING);
+	//
+	//	Initialize
+	//
+	::SetCurrentDirectoryA(app_dir().c_str());
+	{
+		std::string	cfg_file;
+		if(__argc >= 2){
+			if(::PathIsDirectoryA(__argv[1])){
+				cfg_file.assign(__argv[1]);
+				cfg_file.append("\\");
+			}
+		}
+		cfg_file.append("config.ini");
+		std::ifstream	ifs(cfg_file);
+		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+			return	EXIT_FAILURE;
+		}
+	}
 
-	_Module.Init(NULL, hInstance);
+	//
+	//	Main Procedure.
+	//
+
+	g_module.Init(NULL, hInstance);
 
 	do
 	{
@@ -47,7 +61,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}while(true);
 
-	_Module.Term();
+	g_module.Term();
 
 	return (int) EXIT_SUCCESS;
 }

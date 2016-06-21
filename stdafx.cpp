@@ -4,9 +4,12 @@
 
 #include "stdafx.h"
 
-// TODO: 在 STDAFX.H 中
-// 引用任何所需的附加头文件，而不是在此文件中引用
-CComModule	_Module;
+//	ATL Module
+CComModule		g_module;
 
 BEGIN_OBJECT_MAP(ObjectMap)
 END_OBJECT_MAP()
+
+
+//	config data
+stringify_data	g_config;
