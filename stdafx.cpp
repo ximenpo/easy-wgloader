@@ -9,7 +9,3 @@ CComModule		g_module;
 
 BEGIN_OBJECT_MAP(ObjectMap)
 END_OBJECT_MAP()
-
-
-//	config data
-stringify_data	g_config;

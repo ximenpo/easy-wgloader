@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "DlgLogin.h"
 
+static	const	UINT	TIMER_SHOWWINDOW	= 100;
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
@@ -14,22 +15,23 @@ LoginDialog::~LoginDialog(void)
 
 LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	::EndDialog(m_hWnd, wID);
+	DestroyWindow();
 	return 0;
 }
 
-LRESULT LoginDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT LoginDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
+	bHandled	= FALSE;
 	return 0;
 }
-
-
 
 LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	if(!superClass::OnInitDialog(uMsg, wParam, lParam, bHandled)){
 		return	FALSE;
 	}
+
+	ShowWindow(SW_HIDE);
 
 	RECT rc;
 	GetClientRect(&rc);
@@ -47,6 +49,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 
 	CenterWindow();
 
+	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
 	return TRUE;
 }
 
@@ -62,5 +65,19 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	}
 
 	bHandled	= FALSE;
+	return 0;
+}
+
+
+LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+	switch(wParam){
+	case TIMER_SHOWWINDOW:{
+		KillTimer(TIMER_SHOWWINDOW);
+		ShowWindow(SW_SHOW);
+		UpdateWindow();
+		m_ctrlWeb.UpdateWindow();
+						  }break;
+	}
 	return 0;
 }

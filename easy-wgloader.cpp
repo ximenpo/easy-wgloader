@@ -11,6 +11,11 @@
 
 #include "simple/app.h"
 
+//	config data
+stringify_data	g_config;
+Params			g_param;
+
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPTSTR    lpCmdLine,
@@ -24,17 +29,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//
 	::SetCurrentDirectoryA(app_dir().c_str());
 	{
-		std::string	cfg_file;
+		std::string	cfg_dir(".\\");
 		if(__argc >= 2){
 			if(::PathIsDirectoryA(__argv[1])){
-				cfg_file.assign(__argv[1]);
-				cfg_file.append("\\");
+				cfg_dir.assign(__argv[1]);
+				cfg_dir.append("\\");
 			}
 		}
-		cfg_file.append("config.ini");
-		std::ifstream	ifs(cfg_file);
-		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
-			return	EXIT_FAILURE;
+		//	first	config(overide global)
+		if(::PathFileExistsA((cfg_dir+"first.ini").c_str())){
+			std::ifstream	ifs(cfg_dir+"first.ini");
+			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+				//	ignore errors ...
+			}
+#ifdef	NDEBUG
+			DeleteFileA((cfg_dir+"first.ini").c_str());
+#endif
+		}
+		//	global config
+		{
+			std::ifstream	ifs(cfg_dir+"config.ini");
+			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+				return	EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -44,14 +61,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	g_module.Init(NULL, hInstance);
 
+	{
+		g_param.clear();
+		g_param.delay	= atoi(g_config.get_value("config/delay", "0").c_str());
+	}
+
 	do
 	{
 		//	login
 		{
 			LoginDialog	dlg;
-			if(dlg.DoModal(NULL) == IDCANCEL){
-				break;
+			dlg.Create(NULL);
+
+			MSG msg;
+			while (dlg.IsWindow() && GetMessage(&msg, NULL, 0, 0))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 			}
+		}
+
+		if(g_param.game_url.empty()){
+			break;
 		}
 
 		//	game
@@ -59,6 +90,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			GameDialog	dlg;
 			dlg.DoModal(NULL);
 		}
+
+		g_param.clear();
 	}while(true);
 
 	g_module.Term();
