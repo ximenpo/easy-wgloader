@@ -19,6 +19,9 @@
     <Filter Include="simple-cpp-win32">
       <UniqueIdentifier>{8e686901-a2e3-49cb-8fb6-046433130775}</UniqueIdentifier>
     </Filter>
+    <Filter Include="example">
+      <UniqueIdentifier>{27cee059-4a8c-40ac-92ae-ba8a38676cef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="easy-wgloader.ico">
@@ -29,6 +32,12 @@
     </None>
     <None Include="copy-releases.cmd" />
     <None Include="copy-testdata.cmd" />
+    <None Include="bin\first.ini">
+      <Filter>example</Filter>
+    </None>
+    <None Include="bin\config.ini">
+      <Filter>example</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DlgLogin.h">
@@ -73,6 +82,18 @@
       <Filter>simple-cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\simple-cpp\inc\simple\stringify.cpp">
+      <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\res.cpp">
+      <Filter>simple-cpp-win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp\inc\simple\string_ex.cpp">
+      <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp\inc\simple\_third_convert_utf.cpp">
+      <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp\inc\simple\_third_pwgen.c">
       <Filter>simple-cpp</Filter>
     </ClCompile>
   </ItemGroup>

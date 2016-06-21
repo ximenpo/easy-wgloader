@@ -27,8 +27,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//
 	//	Initialize
 	//
-	::SetCurrentDirectoryA(app_dir().c_str());
 	{
+		::SetCurrentDirectoryA(app_dir().c_str());
 		std::string	cfg_dir(".\\");
 		if(__argc >= 2){
 			if(::PathIsDirectoryA(__argv[1])){
@@ -53,6 +53,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				return	EXIT_FAILURE;
 			}
 		}
+		::SetCurrentDirectoryA(cfg_dir.c_str());
 	}
 
 	//
