@@ -4,6 +4,27 @@
 
 #include "stdafx.h"
 
+#include	<GdiPlus.h>
+#pragma		comment(lib, "Gdiplus.lib")
+using namespace Gdiplus;
+
+//////////////////////////////////////////////////////////////////
+class	GdiplusInitializer{
+public:
+	GdiplusInitializer(){
+		GdiplusStartupInput gdiplusStartupInput;
+		GdiplusStartup(&gdiplusToken_, &gdiplusStartupInput, NULL);
+	}
+	~GdiplusInitializer(){
+		GdiplusShutdown(gdiplusToken_);
+	}
+
+private:
+	ULONG_PTR		gdiplusToken_;
+};
+static	GdiplusInitializer	s_gdiplus_initializer;
+
+//////////////////////////////////////////////////////////////////
 //	ATL Module
 CComModule		g_module;
 

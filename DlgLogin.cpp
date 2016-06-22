@@ -3,11 +3,17 @@
 
 #include	"simple/string.h"
 #include	"simple-win32/res.h"
+#include	"simple-win32/win.h"
+#include	"simple-win32/string.h"
+
+#include	"DlgImage.h"
 
 static	const	UINT	TIMER_SHOWWINDOW	= 100;
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
+	,	m_hBrush(NULL)
+	,	m_pImageDlg(NULL)
 {
 }
 
@@ -24,6 +30,23 @@ LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 
 LRESULT LoginDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
+	RECT	rc_client;
+	GetClientRect(&rc_client);
+
+	PAINTSTRUCT ps;
+	HDC hdc	= BeginPaint(&ps);
+
+	if(m_memDC.get_HDC() != NULL){
+		BitBlt(hdc, 
+			rc_client.left, rc_client.top, 
+			rc_client.right, rc_client.bottom, 
+			m_memDC, 
+			0, 0, 
+			SRCCOPY
+			);
+	}
+
+	EndPaint(&ps);
 	bHandled	= FALSE;
 	return 0;
 }
@@ -33,8 +56,37 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 	if(!superClass::OnInitDialog(uMsg, wParam, lParam, bHandled)){
 		return	FALSE;
 	}
-	
+
 	ShowWindow(SW_HIDE);
+
+	//	window size.
+	{
+		int	w, h;
+		if(string_tonumbers(g_config.get_value("login/size",""), w, h)){
+			MoveWindow(0, 0, w, h, FALSE);
+		}
+		CenterWindow();
+	}
+
+	//	bg imgs
+	{
+		RECT	rc;
+		GetClientRect(&rc);
+		HDC	hdc	= GetDC();
+		m_memDC.initialize(rc.right - rc.left, rc.bottom - rc.top, hdc, RGB(0,0,0));
+		ReleaseDC(hdc);
+
+		SubImage	img;
+		if(m_imgCache.load(img, g_config.get_value("login/img", ""))) {
+			Gdiplus::Graphics graphics(m_memDC);
+			graphics.DrawImage(img.image,
+				0, 0,
+				img.rect.X, img.rect.Y, img.rect.Width, img.rect.Height,
+				Gdiplus::UnitPixel);
+		}
+	}
+
+	//	window style.
 	{
 		std::string	rgn	= g_config.get_value("login/rgn", "");
 		std::string	img_trans	= g_config.get_value("login/img_trans", "");
@@ -49,48 +101,42 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 
 		if(!rgn.empty()){
 			//	rgn
-			size_t	size	= 0;
-			if(!Res_LoadFile(rgn.c_str(), NULL, size)){
-				return	true;
-			}
-			std::auto_ptr<char>	data(new char[size]);
-			if(!Res_LoadFile(rgn.c_str(), data.get(), size)){
-				return	true;
-			}
-
-			XFORM xform;
-			xform.eM11 = (FLOAT) 1.0;
-			xform.eM22 = (FLOAT) 1.0;
-			xform.eM12 = (FLOAT) 0.0;
-			xform.eM21 = (FLOAT) 0.0;
-			xform.eDx  = (FLOAT) 0.0;
-			xform.eDy  = (FLOAT) 0.0;
-
-			HRGN rgn = ExtCreateRegion(&xform, DWORD(size),(RGNDATA*)data.get());
-			SetWindowRgn(rgn, FALSE);
-		}else if(!img_trans.empty()){
-			//	LayeredWindow with trans key
-			unsigned int	r(255),g(0),b(255);
-			if(string_tonumbers(img_trans, r, g, b)){
-				SetLayeredWindowAttributes(m_hWnd, RGB(r,g,b), 0, LWA_COLORKEY);
-			}
+			Win_SetRgnFromFile(m_hWnd, rgn.c_str());
 		}else{
-			//	LayeredWindow with png, default.
+			if(!img_trans.empty()){
+				//	LayeredWindow with trans key
+				unsigned int	r(255),g(0),b(255);
+				if(string_tonumbers(img_trans, r, g, b)){
+					SetLayeredWindowAttributes(m_hWnd, RGB(r,g,b), 0, LWA_COLORKEY);
+				}
+			}else{
+				//	LayeredWindow with png, default.
+				m_hBrush	= ::CreateSolidBrush(RGB(255,0,255));
+				SetLayeredWindowAttributes(m_hWnd, RGB(255,0,255), 0, LWA_COLORKEY);
+			}
+			
+			{
+				m_pImageDlg	= new ImageDialog();
+				m_pImageDlg->Create(NULL);
+				m_pImageDlg->UpdateImage(m_hWnd, m_memDC);
+				m_memDC.uninitialize();
+			}
 		}
 	}
 
 	//	IE Control
 	{
+		RECT	rc;
+		String_ToRect(g_config.get_value("login/web_rect", ""), rc);
 		m_ctrlWeb	= GetDlgItem(IDC_WEB);
+		m_ctrlWeb.MoveWindow(&rc, FALSE);
 		m_ctrlWeb.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWeb);
 
 		{
-			CComVariant	sURL(_T("http://www.baidu.com"));
+			CComVariant	sURL(string_ansi_to_wchar(g_config.get_value("login/url", "about:blank"), NULL));
 			m_pWeb->Navigate2(&sURL,0,0,0,0);
 		}
 	}
-
-	CenterWindow();
 
 	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
 	return TRUE;
@@ -106,6 +152,13 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 			m_pWeb->Release(); 
 		}
 	}
+	//	Brush
+	if(NULL != m_hBrush) {
+		DeleteBrush(m_hBrush);
+		m_hBrush	= NULL;
+	}
+
+	m_memDC.uninitialize();
 
 	bHandled	= FALSE;
 	return 0;
@@ -117,10 +170,30 @@ LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 	switch(wParam){
 	case TIMER_SHOWWINDOW:{
 		KillTimer(TIMER_SHOWWINDOW);
+		if(NULL != m_pImageDlg) {
+				m_pImageDlg->ShowWindow(SW_SHOW);
+		}
 		ShowWindow(SW_SHOW);
-		UpdateWindow();
-		m_ctrlWeb.UpdateWindow();
+
+		//	TODO:
+		//UpdateWindow();
+		//m_ctrlWeb.UpdateWindow();
 						  }break;
 	}
+	return 0;
+}
+
+LRESULT LoginDialog::OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+	return HTCAPTION;
+}
+
+
+LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	if(NULL != m_hBrush) {
+		return	LRESULT(m_hBrush);
+	}
+
+	bHandled	= FALSE;
 	return 0;
 }

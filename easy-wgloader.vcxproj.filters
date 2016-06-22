@@ -22,6 +22,9 @@
     <Filter Include="example">
       <UniqueIdentifier>{27cee059-4a8c-40ac-92ae-ba8a38676cef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="simple-cpp-win32\gdiplus">
+      <UniqueIdentifier>{4fc60e3a-da2b-4765-95c8-5d16cfefa32c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="easy-wgloader.ico">
@@ -56,6 +59,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DlgGame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgImage.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,6 +101,18 @@
     </ClCompile>
     <ClCompile Include="..\simple-cpp\inc\simple\_third_pwgen.c">
       <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\bitmap.cpp">
+      <Filter>simple-cpp-win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\gdiplus\subimage.cpp">
+      <Filter>simple-cpp-win32\gdiplus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\win.cpp">
+      <Filter>simple-cpp-win32</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgImage.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
