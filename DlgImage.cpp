@@ -12,7 +12,7 @@ ImageDialog::~ImageDialog(void)
 {
 }
 
-void	ImageDialog::UpdateImage(HWND hWnd, HDC hdc) {
+void	ImageDialog::UpdateImage(HWND hWnd, HDC hdc, const char* title) {
 	m_ctrlWnd	= hWnd;
 
 	const BYTE	SourceConstantAlpha	= 255;
@@ -33,6 +33,8 @@ void	ImageDialog::UpdateImage(HWND hWnd, HDC hdc) {
 	::ReleaseDC(NULL, dcScreen);
 
 	::SetWindowLongPtrW(m_ctrlWnd, GWL_HWNDPARENT, LONG(m_hWnd));
+
+	::SetWindowTextA(m_hWnd, title);
 }
 
 LRESULT ImageDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

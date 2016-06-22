@@ -13,7 +13,7 @@ public:
 	
 public:
 	enum	{IDD = IDD_DUMMY};
-	void	UpdateImage(HWND hWnd, HDC hdc);
+	void	UpdateImage(HWND hWnd, HDC hdc, const char* title);
 
 private:
 	HWND	m_ctrlWnd;

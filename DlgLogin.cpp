@@ -65,6 +65,8 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		if(string_tonumbers(g_config.get_value("login/size",""), w, h)){
 			MoveWindow(0, 0, w, h, FALSE);
 		}
+
+		::SetWindowTextA(m_hWnd, g_config.get_value("login/title", "").c_str());
 		CenterWindow();
 	}
 
@@ -113,12 +115,13 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 				//	LayeredWindow with png, default.
 				m_hBrush	= ::CreateSolidBrush(RGB(255,0,255));
 				SetLayeredWindowAttributes(m_hWnd, RGB(255,0,255), 0, LWA_COLORKEY);
-			}
-			
-			{
+
+				//	background image
 				m_pImageDlg	= new ImageDialog();
 				m_pImageDlg->Create(NULL);
-				m_pImageDlg->UpdateImage(m_hWnd, m_memDC);
+				m_pImageDlg->UpdateImage(m_hWnd, m_memDC, g_config.get_value("login/title", "").c_str());
+
+				// no need now.
 				m_memDC.uninitialize();
 			}
 		}
@@ -171,7 +174,7 @@ LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 	case TIMER_SHOWWINDOW:{
 		KillTimer(TIMER_SHOWWINDOW);
 		if(NULL != m_pImageDlg) {
-				m_pImageDlg->ShowWindow(SW_SHOW);
+			m_pImageDlg->ShowWindow(SW_SHOW);
 		}
 		ShowWindow(SW_SHOW);
 
