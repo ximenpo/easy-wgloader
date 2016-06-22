@@ -139,6 +139,11 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			CComVariant	sURL(string_ansi_to_wchar(g_config.get_value("login/url", "about:blank"), NULL));
 			m_pWeb->Navigate2(&sURL,0,0,0,0);
 		}
+
+		//	debug
+		{
+			m_pWeb->put_Silent(g_param.debug ? VARIANT_FALSE : VARIANT_TRUE);
+		}
 	}
 
 	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);

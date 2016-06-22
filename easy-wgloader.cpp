@@ -36,6 +36,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				cfg_dir.append("\\");
 			}
 		}
+		
+#ifndef	NDEBUG
+		cfg_dir	= "..\\bin\\";
+#endif
+
 		//	first	config(overide global)
 		if(::PathFileExistsA((cfg_dir+"first.ini").c_str())){
 			std::ifstream	ifs(cfg_dir+"first.ini");
@@ -46,6 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			DeleteFileA((cfg_dir+"first.ini").c_str());
 #endif
 		}
+
 		//	global config
 		{
 			std::ifstream	ifs(cfg_dir+"config.ini");
@@ -69,6 +75,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	do
 	{
+		g_param.debug	= g_config.get_value("config/debug","") == "1";
+
 		//	login
 		{
 			LoginDialog	dlg;
