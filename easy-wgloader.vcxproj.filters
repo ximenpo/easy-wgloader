@@ -25,6 +25,9 @@
     <Filter Include="simple-cpp-win32\gdiplus">
       <UniqueIdentifier>{4fc60e3a-da2b-4765-95c8-5d16cfefa32c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="simple-cpp-win32\atl">
+      <UniqueIdentifier>{bd928c1e-e5c7-446c-902c-66207f26500c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="easy-wgloader.ico">
@@ -63,6 +66,9 @@
     </ClInclude>
     <ClInclude Include="DlgImage.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.h">
+      <Filter>simple-cpp-win32\atl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +119,9 @@
     </ClCompile>
     <ClCompile Include="DlgImage.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.cpp">
+      <Filter>simple-cpp-win32\atl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
