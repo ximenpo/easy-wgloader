@@ -29,16 +29,32 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//	Initialize
 	//
 	{
-		//	Strings
+		//	config files' name
+		std::string	s_config, s_config_ex, s_config_temp;
 		{
-			wchar_t	buf[MAX_PATH];
-			
+			char	buf[MAX_PATH];
+			LoadStringA(hInstance, IDS_CONFIG_TEMP, buf, MAX_PATH);
+			s_config_temp.assign(buf);
+			LoadStringA(hInstance, IDS_CONFIG_EX, buf, MAX_PATH);
+			s_config_ex.assign(buf);
+			LoadStringA(hInstance, IDS_CONFIG, buf, MAX_PATH);
+			s_config.assign(buf);
+
+			if(__argc >= 3) {
+				s_config_ex.assign(__argv[2]);
+			}
+			if(__argc >= 4) {
+				s_config_temp.assign(__argv[3]);
+			}
+		}
+
+		//	System Strings
+		{
+			wchar_t	buf[MAX_PATH];			
 			LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
 			g_param.cs_REG_IE_OPTION.assign(buf);
-
 			LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
-			g_param.cs_IsGameLoader.assign(buf);
-			
+			g_param.cs_IsGameLoader.assign(buf);			
 			LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
 			g_param.cs_LoadGame.assign(buf);
 		}
@@ -51,25 +67,41 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				cfg_dir.append("\\");
 			}
 		}
-		
-#ifndef	NDEBUG
-		cfg_dir	= "..\\bin\\";
-#endif
 
-		//	first	config(overide global)
-		if(::PathFileExistsA((cfg_dir+"first.ini").c_str())){
-			std::ifstream	ifs(cfg_dir+"first.ini");
+		//	debug options
+		{
+#ifndef	NDEBUG
+			cfg_dir	= "..\\bin\\";
+#endif
+			g_param.debug	= false;
+			if(::PathFileExistsA((cfg_dir + "debug.ini").c_str())) {
+				g_param.debug	= true;
+			}
+		}
+
+		//	first config(overide extend and normal)
+		if(::PathFileExistsA((cfg_dir + s_config_temp).c_str())){
+			std::ifstream	ifs(cfg_dir + s_config_temp);
 			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
 				//	ignore errors ...
 			}
-#ifdef	NDEBUG
-			DeleteFileA((cfg_dir+"first.ini").c_str());
-#endif
+
+			if(!g_param.debug) {
+				DeleteFileA((cfg_dir + s_config_temp).c_str());
+			}
+		}
+
+		//	exttend	config(overide normal)
+		if(::PathFileExistsA((cfg_dir + s_config_ex).c_str())){
+			std::ifstream	ifs(cfg_dir + s_config_ex);
+			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+				//	ignore errors ...
+			}
 		}
 
 		//	global config
 		{
-			std::ifstream	ifs(cfg_dir+"config.ini");
+			std::ifstream	ifs(cfg_dir + s_config);
 			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
 				return	EXIT_FAILURE;
 			}
@@ -90,8 +122,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	do
 	{
-		g_param.debug	= g_config.get_value("config/debug","") == "1";
-
 		//	login
 		{
 			LoginDialog	dlg;
