@@ -123,6 +123,12 @@
     <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.cpp">
       <Filter>simple-cpp-win32\atl</Filter>
     </ClCompile>
+    <ClCompile Include="..\simple-cpp\inc\simple\_third_url_parser.c">
+      <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp\inc\simple\string_mime.cpp">
+      <Filter>simple-cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="easy-wgloader.rc">

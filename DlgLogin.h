@@ -35,6 +35,8 @@ private:
 	Bitmap_HDC			m_memDC;
 	SubImage_ImageCache	m_imgCache;
 
+	void	do_CloseWindow();
+
 public:
 	enum	{IDD = IDD_LOGIN};
 	enum	{IDC_BTN_FIRST	= 10000, IDC_BTN_LAST=10100};

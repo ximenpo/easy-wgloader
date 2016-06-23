@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "DlgLogin.h"
 
-#include "DlgImage.h"
+#include	<ShellAPI.h>
+
+#include	"DlgImage.h"
 
 #include	"simple/string.h"
 #include	"simple-win32/res.h"
@@ -23,9 +25,15 @@ LoginDialog::~LoginDialog(void)
 {
 }
 
+
+void	LoginDialog::do_CloseWindow() {
+	DestroyWindow();
+}
+
+
 LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	DestroyWindow();
+	this->do_CloseWindow();
 	return 0;
 }
 
@@ -262,13 +270,47 @@ LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 
 
 LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled) {
-	ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
-	if(it != m_imgButtons.end()){
-		std::string*	url;
-		stringify::node_id	cfg_id	= it->second->GetWindowLongW(GWL_USERDATA);
-		if(g_config.fetch(cfg_id, "url", &url)) {
-			::MessageBoxA(m_hWnd, url->c_str(), NULL, MB_OK);
+	do{
+		ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
+		if(it == m_imgButtons.end()){
+			break;
 		}
-	}
+
+		std::string		scheme, *url;
+		stringify::node_id	cfg_id	= it->second->GetWindowLongW(GWL_USERDATA);
+		if(		!g_config.fetch(cfg_id, "url", &url)
+			||	!string_parse_url(url->c_str(), &scheme)
+			){
+				break;
+		}
+
+		//	web links
+		if(		0 == _stricmp(scheme.c_str(), "http")
+			||	0 == _stricmp(scheme.c_str(), "https")
+			){
+				::ShellExecuteA(m_hWnd, "open", url->c_str(), NULL, NULL, SW_SHOW);
+				break;
+		}
+
+		if(0 != _stricmp(scheme.c_str(), "app")) {
+			break;
+		}
+
+		if(0 == _stricmp(url->c_str(), "app://close")) {
+			this->do_CloseWindow();
+			break;
+		}
+
+		if(0 == _stricmp(url->c_str(), "app://minimize")) {
+			if(NULL != m_pImageDlg) {
+				m_pImageDlg->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+			}else{
+				this->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+			}
+			break;
+		}
+
+	}while(false);
+
 	return	0;
 }
