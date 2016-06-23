@@ -89,7 +89,7 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.h" />
+    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.h" />
     <ClInclude Include="DlgGame.h" />
     <ClInclude Include="DlgImage.h" />
     <ClInclude Include="DlgLogin.h" />
@@ -99,7 +99,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.cpp">
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>

@@ -1,12 +1,13 @@
 #include "StdAfx.h"
 #include "DlgLogin.h"
 
+#include "DlgImage.h"
+
 #include	"simple/string.h"
 #include	"simple-win32/res.h"
 #include	"simple-win32/win.h"
 #include	"simple-win32/string.h"
-
-#include	"DlgImage.h"
+#include	"simple-win32/atl/ImageButton.h"
 
 static	const	UINT	TIMER_SHOWWINDOW	= 100;
 
@@ -85,6 +86,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 				0, 0,
 				img.rect.X, img.rect.Y, img.rect.Width, img.rect.Height,
 				Gdiplus::UnitPixel);
+			m_imgCache.clear();
 		}
 	}
 
@@ -94,7 +96,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		std::string	img_trans	= g_config.get_value("login/img_trans", "");
 
 		{
-			LONG	wnd_ex_style	= this->GetWindowLongW(GWL_EXSTYLE) & ~WS_EX_LAYERED;
+			DWORD	wnd_ex_style	= this->GetExStyle() & ~WS_EX_LAYERED;
 			if(rgn.empty()){
 				wnd_ex_style	|=	WS_EX_LAYERED;
 			}
@@ -124,6 +126,47 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 				// no need now.
 				m_memDC.uninitialize();
 			}
+		}
+	}
+
+	//	Buttons
+	{
+		int	btn_id	= IDC_BTN_FIRST;
+		std::deque<std::string>	btn_names;
+		string_split(g_config.get_value("login/buttons", ""), "|", std::back_inserter(btn_names), true);
+		std::deque<std::string>::const_iterator
+			it		= btn_names.begin(),
+			it_end	= btn_names.end();
+		for(; it != it_end; ++it) {
+			stringify::node_id	cfg_id;
+			if(!g_config.fetch(*it, &cfg_id)){
+				continue;
+			}
+
+			RECT	rc;
+			if(!String_ToWHRect(g_config.get_value(*it, "rect", ""), rc)) {
+				continue;
+			}
+
+			ImageButton*	btn	= new ImageButton();
+			::CreateWindowA("BUTTON",
+				it->c_str(),
+				WS_VISIBLE|WS_CHILD|BS_OWNERDRAW,
+				rc.left, rc.top, rc.right, rc.bottom,
+				m_hWnd,
+				HMENU(++btn_id),
+				g_instace,
+				NULL
+				);
+			btn->SubclassWindow(GetDlgItem(btn_id));
+			btn->SetWindowLongW(GWL_USERDATA, cfg_id);
+
+			m_imgCache.load(btn->NormalImage,	g_config.get_value(*it, "img_u", ""));
+			m_imgCache.load(btn->SelectedImage, g_config.get_value(*it, "img_d", ""));
+			m_imgCache.load(btn->HoverImage,	g_config.get_value(*it, "img_a", ""));
+			m_imgCache.load(btn->DisabledImage, g_config.get_value(*it, "img_g", ""));
+
+			m_imgButtons.insert(std::make_pair(btn_id, btn));
 		}
 	}
 
@@ -160,9 +203,24 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 			m_pWeb->Release(); 
 		}
 	}
+
+	//	Buttons
+	{
+		ImageButtonList::const_iterator
+			it		= m_imgButtons.begin(),
+			it_end	= m_imgButtons.end()
+			;
+
+		for(; it != it_end; ++it){
+			it->second->DestroyWindow();
+			delete	it->second;
+		}
+		m_imgButtons.clear();
+	}
+
 	//	Brush
 	if(NULL != m_hBrush) {
-		DeleteBrush(m_hBrush);
+		DeleteObject(m_hBrush);
 		m_hBrush	= NULL;
 	}
 
@@ -182,10 +240,6 @@ LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 			m_pImageDlg->ShowWindow(SW_SHOW);
 		}
 		ShowWindow(SW_SHOW);
-
-		//	TODO:
-		//UpdateWindow();
-		//m_ctrlWeb.UpdateWindow();
 						  }break;
 	}
 	return 0;
@@ -204,4 +258,17 @@ LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 
 	bHandled	= FALSE;
 	return 0;
+}
+
+
+LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled) {
+	ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
+	if(it != m_imgButtons.end()){
+		std::string*	url;
+		stringify::node_id	cfg_id	= it->second->GetWindowLongW(GWL_USERDATA);
+		if(g_config.fetch(cfg_id, "url", &url)) {
+			::MessageBoxA(m_hWnd, url->c_str(), NULL, MB_OK);
+		}
+	}
+	return	0;
 }

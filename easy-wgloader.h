@@ -16,6 +16,8 @@ struct	Params{
 	};
 };
 
+extern	HINSTANCE		g_instace;
+
 extern	CComModule		g_module; 
 extern	stringify_data	g_config;
 extern	Params			g_param;

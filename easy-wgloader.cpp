@@ -14,6 +14,7 @@
 //	config data
 stringify_data	g_config;
 Params			g_param;
+HINSTANCE		g_instace;
 
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,

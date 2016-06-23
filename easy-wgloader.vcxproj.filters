@@ -67,7 +67,7 @@
     <ClInclude Include="DlgImage.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.h">
+    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.h">
       <Filter>simple-cpp-win32\atl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,7 +120,7 @@
     <ClCompile Include="DlgImage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\BitmapButton.cpp">
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.cpp">
       <Filter>simple-cpp-win32\atl</Filter>
     </ClCompile>
   </ItemGroup>
