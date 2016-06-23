@@ -18,11 +18,10 @@ LRESULT GameDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 	return 0;
 }
 
-LRESULT GameDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-{
-	return 0;
-}
 
+LRESULT GameDialog::OnEraseBkgnd(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+	return	1;
+}
 
 
 LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -34,18 +33,23 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	RECT rc;
 	GetClientRect(&rc);
 
+	//	Title
+	{
+		this->SetWindowTextW(g_param.game_title.c_str());
+	}
+
 	//	IE Control
 	{
 		m_ctrlWeb	= GetDlgItem(IDC_WEB);
 		m_ctrlWeb.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWeb);
 
 		{
-			CComVariant	sURL(_T("http://www.baidu.com"));
+			CComVariant	sURL(g_param.game_url.c_str());
 			m_pWeb->Navigate2(&sURL,0,0,0,0);
 		}
 	}
 
-	CenterWindow();
+	ShowWindow(SW_MAXIMIZE);
 
 	return TRUE;
 }

@@ -11,7 +11,9 @@
 #include	"simple-win32/string.h"
 #include	"simple-win32/atl/ImageButton.h"
 
-static	const	UINT	TIMER_SHOWWINDOW	= 100;
+static	const	UINT	TIMER_NAVIGATE		= 101;
+static	const	UINT	TIMER_SHOWWINDOW	= 102;
+static	const	UINT	TIMER_CLOSEWINDOW	= 103;
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
@@ -23,13 +25,32 @@ LoginDialog::LoginDialog(void)
 
 LoginDialog::~LoginDialog(void)
 {
+	if(NULL != m_pImageDlg) {
+		m_pImageDlg->DestroyWindow();
+		delete	m_pImageDlg;
+		m_pImageDlg	= NULL;
+	}
 }
 
 
 void	LoginDialog::do_CloseWindow() {
-	DestroyWindow();
+	SetTimer(TIMER_CLOSEWINDOW, 0, NULL);
 }
 
+
+void	LoginDialog::do_IsGameLoader(_variant_t& ret) {
+	ret	= VARIANT_TRUE;
+}
+
+
+void	LoginDialog::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) {
+	g_param.game_url	= url.bstrVal;
+	g_param.game_title	= title.bstrVal;
+
+	this->do_CloseWindow();
+
+	ret	= VARIANT_TRUE;
+}
 
 LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
@@ -191,13 +212,17 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			m_pWeb->Navigate2(&sURL,0,0,0,0);
 		}
 
+		{
+			m_IECustomizer.SetExternalDispatch((DispatchImpl*)this);
+		}
+
 		//	debug
 		{
 			m_pWeb->put_Silent(g_param.debug ? VARIANT_FALSE : VARIANT_TRUE);
 		}
 	}
 
-	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
+	SetTimer(TIMER_NAVIGATE, 0, NULL);
 	return TRUE;
 }
 
@@ -242,13 +267,27 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	switch(wParam){
-	case TIMER_SHOWWINDOW:{
-		KillTimer(TIMER_SHOWWINDOW);
-		if(NULL != m_pImageDlg) {
-			m_pImageDlg->ShowWindow(SW_SHOW);
-		}
-		ShowWindow(SW_SHOW);
-						  }break;
+	case TIMER_NAVIGATE:
+		{
+			KillTimer(TIMER_NAVIGATE);
+			CComVariant	sURL(string_ansi_to_wchar(g_config.get_value("login/url", "about:blank"), NULL));
+			m_pWeb->Navigate2(&sURL,0,0,0,0);
+
+			SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
+		}break;
+	case TIMER_SHOWWINDOW:
+		{
+			KillTimer(TIMER_SHOWWINDOW);
+			if(NULL != m_pImageDlg) {
+				m_pImageDlg->ShowWindow(SW_SHOW);
+			}
+			ShowWindow(SW_SHOW);
+		}break;
+	case TIMER_CLOSEWINDOW:
+		{
+			KillTimer(TIMER_CLOSEWINDOW);
+			DestroyWindow();
+		}break;
 	}
 	return 0;
 }
@@ -313,4 +352,14 @@ LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl
 	}while(false);
 
 	return	0;
+}
+
+
+void __stdcall LoginDialog::DocumentCompleteWeb(LPDISPATCH pDisp, VARIANT* URL)
+{
+	IDispatch*	pDoc;
+	if(SUCCEEDED(m_pWeb->get_Document(&pDoc))) {
+		m_IECustomizer.AttachTo(pDoc);
+		pDoc->Release();
+	}
 }

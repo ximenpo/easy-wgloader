@@ -70,6 +70,9 @@
     <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\ImageButton.h">
       <Filter>simple-cpp-win32\atl</Filter>
     </ClInclude>
+    <ClInclude Include="IECustomizer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -128,6 +131,12 @@
     </ClCompile>
     <ClCompile Include="..\simple-cpp\inc\simple\string_mime.cpp">
       <Filter>simple-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="IECustomizer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\ie.cpp">
+      <Filter>simple-cpp-win32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
