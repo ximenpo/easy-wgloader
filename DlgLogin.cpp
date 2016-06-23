@@ -281,7 +281,7 @@ LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 			if(NULL != m_pImageDlg) {
 				m_pImageDlg->ShowWindow(SW_SHOW);
 			}
-			ShowWindow(SW_SHOW);
+			this->ShowWindow(SW_SHOW);
 		}break;
 	case TIMER_CLOSEWINDOW:
 		{

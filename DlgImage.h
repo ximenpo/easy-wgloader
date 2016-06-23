@@ -12,7 +12,7 @@ public:
 	~ImageDialog(void);
 	
 public:
-	enum	{IDD = IDD_DUMMY};
+	enum	{IDD = IDD_IMAGE};
 	void	UpdateImage(HWND hWnd, HDC hdc, const char* title);
 
 private:

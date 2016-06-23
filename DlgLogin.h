@@ -48,12 +48,22 @@ private:
 
 private:
 	DISPATCH_ITEMS_BEGIN(LoginDialog)
-		DISPATCH_READONLYPROP(101, L"IsGameLoader", do_IsGameLoader)
-		DISPATCH_FUNCTION(102, L"LoadGame", do_LoadGame)
+		DISPATCH_READONLYPROP(101, g_param.cs_IsGameLoader.c_str(), do_IsGameLoader)
+		DISPATCH_FUNCTION(102, g_param.cs_LoadGame.c_str(), do_LoadGame)
 		DISPATCH_ITEMS_END()
 
 public:
 	enum	{IDD = IDD_LOGIN};
+	
+public:
+	BEGIN_SINK_MAP(LoginDialog)
+		SINK_ENTRY(IDC_WEB, 259, DocumentCompleteWeb)
+	END_SINK_MAP()
+
+private:
+	void __stdcall DocumentCompleteWeb(LPDISPATCH pDisp, VARIANT* URL);
+
+private:
 	enum	{IDC_BTN_FIRST	= 10000, IDC_BTN_LAST=10100};
 	BEGIN_MSG_MAP(thisClass)
 		MESSAGE_HANDLER(WM_NCHITTEST, OnNCHitTest)
@@ -76,10 +86,5 @@ private:
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
-public:
-	BEGIN_SINK_MAP(LoginDialog)
-		SINK_ENTRY(IDC_WEB, 259, DocumentCompleteWeb)
-	END_SINK_MAP()
-	void __stdcall DocumentCompleteWeb(LPDISPATCH pDisp, VARIANT* URL);
 };
 

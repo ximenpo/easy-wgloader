@@ -12,5 +12,8 @@ public:
 public:
     virtual HRESULT STDMETHODCALLTYPE		GetHostInfo(
         /* [out][in] */ DOCHOSTUIINFO __RPC_FAR *pInfo);
+    virtual HRESULT STDMETHODCALLTYPE		GetOptionKeyPath(
+        /* [out] */ LPOLESTR __RPC_FAR *pchKey,
+        /* [in] */ DWORD dw);
 };
 

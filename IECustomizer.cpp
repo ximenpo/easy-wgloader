@@ -21,3 +21,10 @@ HRESULT STDMETHODCALLTYPE IECustomizer::GetHostInfo(
     pInfo->dwFlags	|= DOCHOSTUIFLAG_DIALOG;
     return S_OK;
 }
+
+HRESULT STDMETHODCALLTYPE IECustomizer::GetOptionKeyPath(
+        /* [out] */ LPOLESTR __RPC_FAR *pchKey,
+        /* [in] */ DWORD dw) {
+	*pchKey	= CComBSTR(g_param.cs_REG_IE_OPTION.c_str()).Detach();
+	return	S_OK;
+}

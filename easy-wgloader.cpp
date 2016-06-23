@@ -29,6 +29,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//	Initialize
 	//
 	{
+		//	Strings
+		{
+			wchar_t	buf[MAX_PATH];
+			
+			LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
+			g_param.cs_REG_IE_OPTION.assign(buf);
+
+			LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
+			g_param.cs_IsGameLoader.assign(buf);
+			
+			LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
+			g_param.cs_LoadGame.assign(buf);
+		}
+
 		::SetCurrentDirectoryA(app_dir().c_str());
 		std::string	cfg_dir(".\\");
 		if(__argc >= 2){
@@ -70,7 +84,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	g_module.Init(NULL, hInstance);
 
 	{
-		g_param.clear();
+		g_param.clear_temporary_vars();
 		g_param.delay	= atoi(g_config.get_value("config/delay", "0").c_str());
 	}
 
@@ -101,7 +115,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			dlg.DoModal(NULL);
 		}
 
-		g_param.clear();
+		g_param.clear_temporary_vars();
 	}while(true);
 
 	g_module.Term();
