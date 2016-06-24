@@ -26,9 +26,11 @@ LRESULT GameDialog::OnEraseBkgnd(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 
 LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
+	g_param.main_wnd	= m_hWnd;
 	if(!superClass::OnInitDialog(uMsg, wParam, lParam, bHandled)){
 		return	FALSE;
 	}
+	
 
 	RECT rc;
 	GetClientRect(&rc);

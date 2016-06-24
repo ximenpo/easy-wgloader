@@ -73,6 +73,9 @@
     <ClInclude Include="IECustomizer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\simple-cpp-win32\inc\simple-win32\atl\IEHostWindow.h">
+      <Filter>simple-cpp-win32\atl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -140,6 +143,9 @@
     </ClCompile>
     <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\patcher.cpp">
       <Filter>simple-cpp-win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\IEHostWindow.cpp">
+      <Filter>simple-cpp-win32\atl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

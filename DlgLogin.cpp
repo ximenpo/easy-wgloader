@@ -4,57 +4,26 @@
 #include	<ShellAPI.h>
 
 #include	"DlgImage.h"
+#include	"IECustomizer.h"
 
 #include	"simple/string.h"
-#include	"simple-win32/patcher.h"
 #include	"simple-win32/res.h"
 #include	"simple-win32/string.h"
 #include	"simple-win32/win.h"
 #include	"simple-win32/atl/ImageButton.h"
 
 enum{
-	TIMER_REMOVE_PATCHER	= 101,
-	TIMER_NAVIGATE,
+	TIMER_NAVIGATE	= 101,
 	TIMER_SHOWWINDOW,
 	TIMER_CLOSEWINDOW,
 };
-
-//////////////////////////////////////////////////////////
-//
-//	Hook WM_ATLGETHOST
-//
-typedef	LRESULT	(WINAPI	*FUNC_SendMessageW)(
-	__in HWND hWnd,
-	__in UINT Msg,
-	__in WPARAM wParam,
-	__in LPARAM lParam
-	);
-static	FUNC_SendMessageW	gs_old_SendMessageW;
-
-LRESULT	WINAPI	gs_new_SendMessageW(
-	__in HWND hWnd,
-	__in UINT Msg,
-	__in WPARAM wParam,
-	__in LPARAM lParam)
-{
-	if(Msg == WM_ATLGETHOST && GetDlgCtrlID(hWnd) == IDC_WEB) {
-		LRESULT	ret	= gs_old_SendMessageW(::GetParent(hWnd), Msg, 0, LPARAM(hWnd));
-		if(ret != 0){
-			return	ret;
-		}
-	}
-	return	gs_old_SendMessageW(hWnd, Msg, wParam, lParam);
-}
-static	Patcher	gs_pacher_SendMessageW(&::SendMessageW, &gs_new_SendMessageW, &gs_old_SendMessageW, false, false);
-//
-//////////////////////////////////////////////////////////
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
 	,	m_hBrush(NULL)
 	,	m_pImageDlg(NULL)
 {
-	gs_pacher_SendMessageW.set_patch();
+	IEHostWindow::patch_atl_creator_CAxHostWindow(&IECustomizer::_CreatorClass::CreateInstance);
 }
 
 
@@ -65,6 +34,8 @@ LoginDialog::~LoginDialog(void)
 		delete	m_pImageDlg;
 		m_pImageDlg	= NULL;
 	}
+
+	IEHostWindow::unpatch_atl_creator_CAxHostWindow();
 }
 
 
@@ -72,20 +43,6 @@ void	LoginDialog::do_CloseWindow() {
 	SetTimer(TIMER_CLOSEWINDOW, 0, NULL);
 }
 
-
-void	LoginDialog::do_IsGameLoader(_variant_t& ret) {
-	ret	= VARIANT_TRUE;
-}
-
-
-void	LoginDialog::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) {
-	g_param.game_url	= url.bstrVal;
-	g_param.game_title	= title.bstrVal;
-
-	this->do_CloseWindow();
-
-	ret	= VARIANT_TRUE;
-}
 
 LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
@@ -95,8 +52,8 @@ LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 
 LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled) {
 	do{
-		ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
-		if(it == m_imgButtons.end()){
+		ImageButtonList::const_iterator	it	= m_ImgButtons.find(wID);
+		if(it == m_ImgButtons.end()){
 			break;
 		}
 
@@ -164,6 +121,7 @@ LRESULT LoginDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
+	g_param.main_wnd	= m_hWnd;
 	if(!superClass::OnInitDialog(uMsg, wParam, lParam, bHandled)){
 		return	FALSE;
 	}
@@ -276,7 +234,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			m_imgCache.load(btn->HoverImage,	g_config.get_value(*it, "img_a", ""));
 			m_imgCache.load(btn->DisabledImage, g_config.get_value(*it, "img_g", ""));
 
-			m_imgButtons.insert(std::make_pair(btn_id, btn));
+			m_ImgButtons.insert(std::make_pair(btn_id, btn));
 		}
 	}
 
@@ -294,7 +252,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		}
 
 		{
-			m_IECustomizer.SetExternalDispatch((DispatchImpl*)this);
+			//m_IECustomizer.SetExternalDispatch((DispatchImpl*)this);
 		}
 
 		//	debug
@@ -321,15 +279,15 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	//	Buttons
 	{
 		ImageButtonList::const_iterator
-			it		= m_imgButtons.begin(),
-			it_end	= m_imgButtons.end()
+			it		= m_ImgButtons.begin(),
+			it_end	= m_ImgButtons.end()
 			;
 
 		for(; it != it_end; ++it){
 			it->second->DestroyWindow();
 			delete	it->second;
 		}
-		m_imgButtons.clear();
+		m_ImgButtons.clear();
 	}
 
 	//	Brush
@@ -348,13 +306,6 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	switch(wParam){
-	case TIMER_REMOVE_PATCHER:
-		{
-			KillTimer(TIMER_REMOVE_PATCHER);
-			if(gs_pacher_SendMessageW.patched()){
-				gs_pacher_SendMessageW.remove_patch(true);
-			}
-		}break;
 	case TIMER_NAVIGATE:
 		{
 			KillTimer(TIMER_NAVIGATE);
@@ -393,21 +344,4 @@ LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 
 	bHandled	= FALSE;
 	return 0;
-}
-
-
-LRESULT LoginDialog::OnAtlGetHost(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
-{
-	SetTimer(TIMER_REMOVE_PATCHER, 0, NULL);
-	return 0;
-}
-
-
-void __stdcall LoginDialog::DocumentCompleteWeb(LPDISPATCH pDisp, VARIANT* URL)
-{
-	IDispatch*	pDoc;
-	if(SUCCEEDED(m_pWeb->get_Document(&pDoc))) {
-		m_IECustomizer.AttachTo(pDoc);
-		pDoc->Release();
-	}
 }

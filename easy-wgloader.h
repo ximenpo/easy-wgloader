@@ -11,11 +11,13 @@ struct	Params{
 	
 	//	temporary vars
 	unsigned int	delay;		//	第一次延迟显示时间（秒）
+	HWND			main_wnd;	//	主窗口句柄
 	std::wstring	game_url;	//	进入游戏网址
 	std::wstring	game_title;	//	游戏标题
 	
 	void	clear_temporary_vars(){
-		delay	= 0;
+		main_wnd	= 0;
+		delay		= 0;
 		game_url.clear();
 		game_title.clear();
 	};

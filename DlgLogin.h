@@ -6,18 +6,13 @@
 
 #include "easy-wgloader.h"
 #include "simple-win32/bitmap.h"
-#include "simple-win32/dispatch_impl.h"
 #include "simple-win32/gdiplus/subimage.h"
-
-#include "IECustomizer.h"
 
 class	ImageDialog;
 class	ImageButton;
 
 class LoginDialog :
-	public CAxDialogImpl<LoginDialog, CAxWindow>,
-	public IDispEventImpl<IDC_WEB,LoginDialog>,
-	public DispatchImpl
+	public CAxDialogImpl<LoginDialog, CAxWindow>
 {
 public:
 	LoginDialog(void);
@@ -30,39 +25,24 @@ protected:
 private: 
 	CAxWindow		m_ctrlWeb;
 	IWebBrowser2*	m_pWeb;
-	IECustomizer	m_IECustomizer;
 
 	HBRUSH			m_hBrush;
 	ImageDialog*	m_pImageDlg;
 
-	typedef	std::map<int,ImageButton*>	ImageButtonList;
-	ImageButtonList	m_imgButtons;
-
 	Bitmap_HDC			m_memDC;
 	SubImage_ImageCache	m_imgCache;
 
+	typedef	std::map<int,ImageButton*>	ImageButtonList;
+	ImageButtonList	m_ImgButtons;
+
+	typedef	std::map<HWND, CAxHostWindow*>		HostWindowList;
+	HostWindowList	m_HostWindows;
+
 	void	do_CloseWindow();
-
-	void	do_IsGameLoader(_variant_t& ret);
-	void	do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret);
-
-private:
-	DISPATCH_ITEMS_BEGIN(LoginDialog)
-		DISPATCH_READONLYPROP(101, g_param.cs_IsGameLoader.c_str(), do_IsGameLoader)
-		DISPATCH_FUNCTION(102, g_param.cs_LoadGame.c_str(), do_LoadGame)
-		DISPATCH_ITEMS_END()
 
 public:
 	enum	{IDD = IDD_LOGIN};
 	
-public:
-	BEGIN_SINK_MAP(LoginDialog)
-		SINK_ENTRY(IDC_WEB, 259, DocumentCompleteWeb)
-	END_SINK_MAP()
-
-private:
-	void __stdcall DocumentCompleteWeb(LPDISPATCH pDisp, VARIANT* URL);
-
 private:
 	enum	{IDC_BTN_FIRST	= 10000, IDC_BTN_LAST=10100};
 	BEGIN_MSG_MAP(thisClass)
@@ -72,7 +52,6 @@ private:
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
-		MESSAGE_HANDLER(WM_ATLGETHOST, OnAtlGetHost)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 		COMMAND_RANGE_HANDLER(IDC_BTN_FIRST, IDC_BTN_LAST, OnImageButtonClick)
 		REFLECT_NOTIFICATIONS()
@@ -87,6 +66,5 @@ private:
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	LRESULT OnAtlGetHost(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 };
 
