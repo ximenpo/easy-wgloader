@@ -6,20 +6,55 @@
 #include	"DlgImage.h"
 
 #include	"simple/string.h"
+#include	"simple-win32/patcher.h"
 #include	"simple-win32/res.h"
-#include	"simple-win32/win.h"
 #include	"simple-win32/string.h"
+#include	"simple-win32/win.h"
 #include	"simple-win32/atl/ImageButton.h"
 
-static	const	UINT	TIMER_NAVIGATE		= 101;
-static	const	UINT	TIMER_SHOWWINDOW	= 102;
-static	const	UINT	TIMER_CLOSEWINDOW	= 103;
+enum{
+	TIMER_REMOVE_PATCHER	= 101,
+	TIMER_NAVIGATE,
+	TIMER_SHOWWINDOW,
+	TIMER_CLOSEWINDOW,
+};
+
+//////////////////////////////////////////////////////////
+//
+//	Hook WM_ATLGETHOST
+//
+typedef	LRESULT	(WINAPI	*FUNC_SendMessageW)(
+	__in HWND hWnd,
+	__in UINT Msg,
+	__in WPARAM wParam,
+	__in LPARAM lParam
+	);
+static	FUNC_SendMessageW	gs_old_SendMessageW;
+
+LRESULT	WINAPI	gs_new_SendMessageW(
+	__in HWND hWnd,
+	__in UINT Msg,
+	__in WPARAM wParam,
+	__in LPARAM lParam)
+{
+	if(Msg == WM_ATLGETHOST && GetDlgCtrlID(hWnd) == IDC_WEB) {
+		LRESULT	ret	= gs_old_SendMessageW(::GetParent(hWnd), Msg, 0, LPARAM(hWnd));
+		if(ret != 0){
+			return	ret;
+		}
+	}
+	return	gs_old_SendMessageW(hWnd, Msg, wParam, lParam);
+}
+static	Patcher	gs_pacher_SendMessageW(&::SendMessageW, &gs_new_SendMessageW, &gs_old_SendMessageW, false, false);
+//
+//////////////////////////////////////////////////////////
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
 	,	m_hBrush(NULL)
 	,	m_pImageDlg(NULL)
 {
+	gs_pacher_SendMessageW.set_patch();
 }
 
 
@@ -56,6 +91,52 @@ LRESULT LoginDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 {
 	this->do_CloseWindow();
 	return 0;
+}
+
+LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled) {
+	do{
+		ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
+		if(it == m_imgButtons.end()){
+			break;
+		}
+
+		std::string		scheme, *url;
+		stringify::node_id	cfg_id	= it->second->GetWindowLongW(GWL_USERDATA);
+		if(		!g_config.fetch(cfg_id, "url", &url)
+			||	!string_parse_url(url->c_str(), &scheme)
+			){
+				break;
+		}
+
+		//	web links
+		if(		0 == _stricmp(scheme.c_str(), "http")
+			||	0 == _stricmp(scheme.c_str(), "https")
+			){
+				::ShellExecuteA(m_hWnd, "open", url->c_str(), NULL, NULL, SW_SHOW);
+				break;
+		}
+
+		if(0 != _stricmp(scheme.c_str(), "app")) {
+			break;
+		}
+
+		if(0 == _stricmp(url->c_str(), "app://close")) {
+			this->do_CloseWindow();
+			break;
+		}
+
+		if(0 == _stricmp(url->c_str(), "app://minimize")) {
+			if(NULL != m_pImageDlg) {
+				m_pImageDlg->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+			}else{
+				this->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+			}
+			break;
+		}
+
+	}while(false);
+
+	return	0;
 }
 
 LRESULT LoginDialog::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
@@ -267,6 +348,13 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	switch(wParam){
+	case TIMER_REMOVE_PATCHER:
+		{
+			KillTimer(TIMER_REMOVE_PATCHER);
+			if(gs_pacher_SendMessageW.patched()){
+				gs_pacher_SendMessageW.remove_patch(true);
+			}
+		}break;
 	case TIMER_NAVIGATE:
 		{
 			KillTimer(TIMER_NAVIGATE);
@@ -308,50 +396,10 @@ LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 }
 
 
-LRESULT LoginDialog::OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled) {
-	do{
-		ImageButtonList::const_iterator	it	= m_imgButtons.find(wID);
-		if(it == m_imgButtons.end()){
-			break;
-		}
-
-		std::string		scheme, *url;
-		stringify::node_id	cfg_id	= it->second->GetWindowLongW(GWL_USERDATA);
-		if(		!g_config.fetch(cfg_id, "url", &url)
-			||	!string_parse_url(url->c_str(), &scheme)
-			){
-				break;
-		}
-
-		//	web links
-		if(		0 == _stricmp(scheme.c_str(), "http")
-			||	0 == _stricmp(scheme.c_str(), "https")
-			){
-				::ShellExecuteA(m_hWnd, "open", url->c_str(), NULL, NULL, SW_SHOW);
-				break;
-		}
-
-		if(0 != _stricmp(scheme.c_str(), "app")) {
-			break;
-		}
-
-		if(0 == _stricmp(url->c_str(), "app://close")) {
-			this->do_CloseWindow();
-			break;
-		}
-
-		if(0 == _stricmp(url->c_str(), "app://minimize")) {
-			if(NULL != m_pImageDlg) {
-				m_pImageDlg->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
-			}else{
-				this->SendMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
-			}
-			break;
-		}
-
-	}while(false);
-
-	return	0;
+LRESULT LoginDialog::OnAtlGetHost(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	SetTimer(TIMER_REMOVE_PATCHER, 0, NULL);
+	return 0;
 }
 
 

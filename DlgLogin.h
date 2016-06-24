@@ -70,21 +70,23 @@ private:
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
 		MESSAGE_HANDLER(WM_CTLCOLORDLG, OnCtlColorDlg)
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
-		COMMAND_RANGE_HANDLER(IDC_BTN_FIRST, IDC_BTN_LAST, OnImageButtonClick)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+		MESSAGE_HANDLER(WM_ATLGETHOST, OnAtlGetHost)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+		COMMAND_RANGE_HANDLER(IDC_BTN_FIRST, IDC_BTN_LAST, OnImageButtonClick)
 		REFLECT_NOTIFICATIONS()
 	END_MSG_MAP()
 
 private:
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	LRESULT OnImageButtonClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnAtlGetHost(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 };
 
