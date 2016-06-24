@@ -5,9 +5,20 @@
 
 #include	"easy-wgloader.h"
 
-class IECustomizer :
-	public IEHostWindow,
-	private DispatchImpl
+class	IEExternal	: public	DispatchImpl
+{
+public:
+	DISPATCH_ITEMS_BEGIN(IEExternal)
+		DISPATCH_READONLYPROP(101, g_param.cs_IsGameLoader.c_str(), do_IsGameLoader)
+		DISPATCH_FUNCTION(102, g_param.cs_LoadGame.c_str(), do_LoadGame)
+		DISPATCH_ITEMS_END()
+
+private:
+	void	do_IsGameLoader(_variant_t& ret);
+	void	do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret);
+};
+
+class	IECustomizer	:	public IEHostWindow
 {
 public:
 	IECustomizer(void);
@@ -16,15 +27,8 @@ public:
 public:
 	DECLARE_POLY_AGGREGATABLE(IECustomizer);
 
-public:
-	DISPATCH_ITEMS_BEGIN(IECustomizer)
-		DISPATCH_READONLYPROP(101, g_param.cs_IsGameLoader.c_str(), do_IsGameLoader)
-		DISPATCH_FUNCTION(102, g_param.cs_LoadGame.c_str(), do_LoadGame)
-		DISPATCH_ITEMS_END()
-
 private:
-	void	do_IsGameLoader(_variant_t& ret);
-	void	do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret);
+	IEExternal		external_;
 
 public:
 	//·µ»ØS_OK£¬ÆÁ±ÎµôÓÒ¼ü²Ëµ¥

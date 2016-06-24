@@ -52,6 +52,7 @@ private:
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 		COMMAND_RANGE_HANDLER(IDC_BTN_FIRST, IDC_BTN_LAST, OnImageButtonClick)
 		REFLECT_NOTIFICATIONS()
@@ -66,5 +67,7 @@ private:
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+public:
+	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 };
 

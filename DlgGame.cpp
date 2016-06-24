@@ -12,9 +12,13 @@ GameDialog::~GameDialog(void)
 {
 }
 
+void	GameDialog::do_CloseWindow(){
+	::EndDialog(m_hWnd, 0);
+}
+
 LRESULT GameDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	::EndDialog(m_hWnd, wID);
+	this->do_CloseWindow();
 	return 0;
 }
 
@@ -81,5 +85,12 @@ LRESULT GameDialog::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, 
 		m_ctrlWeb.MoveWindow(rc.left, rc.top, rc.right, rc.bottom, FALSE);
 	}
 
+	return 0;
+}
+
+
+LRESULT GameDialog::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+	this->do_CloseWindow();
 	return 0;
 }

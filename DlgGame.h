@@ -15,6 +15,9 @@ protected:
 	typedef	GameDialog								thisClass;
 	typedef	CAxDialogImpl<GameDialog, CAxWindow>	superClass;
 
+private:
+	void			do_CloseWindow();
+
 private: 
 	CAxWindow		m_ctrlWeb;
 	IWebBrowser2*	m_pWeb;
@@ -25,6 +28,7 @@ public:
 		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
 		MESSAGE_HANDLER(WM_SIZE, OnSize)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
+		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 	END_MSG_MAP()
 
@@ -34,5 +38,6 @@ private:
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnEraseBkgnd(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 };
 

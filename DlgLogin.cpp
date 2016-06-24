@@ -345,3 +345,10 @@ LRESULT LoginDialog::OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 	bHandled	= FALSE;
 	return 0;
 }
+
+
+LRESULT LoginDialog::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+	this->do_CloseWindow();
+	return 0;
+}

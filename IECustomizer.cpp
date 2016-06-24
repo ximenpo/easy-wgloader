@@ -1,31 +1,26 @@
 #include "StdAfx.h"
 #include "IECustomizer.h"
 
-#include "easy-wgloader.h"
+void	IEExternal::do_IsGameLoader(_variant_t& ret) {
+	ret	= VARIANT_TRUE;
+}
+
+void	IEExternal::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) {
+	g_param.game_url	= url.bstrVal;
+	g_param.game_title	= title.bstrVal;
+
+	::SendMessageA(g_param.main_wnd, WM_CLOSE, 0, 0);
+
+	ret	= VARIANT_TRUE;
+}
+
 
 IECustomizer::IECustomizer(void)
 {
 }
 
-
 IECustomizer::~IECustomizer(void)
 {
-}
-
-void	IECustomizer::do_IsGameLoader(_variant_t& ret) {
-	ret	= VARIANT_TRUE;
-}
-
-
-void	IECustomizer::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) {
-	g_param.game_url	= url.bstrVal;
-	g_param.game_title	= title.bstrVal;
-
-	if(NULL != g_param.main_wnd) {
-		::CloseWindow(g_param.main_wnd);
-	}
-
-	ret	= VARIANT_TRUE;
 }
 
 //·µ»ØS_OK£¬ÆÁ±ÎµôÓÒ¼ü²Ëµ¥
@@ -33,22 +28,23 @@ HRESULT STDMETHODCALLTYPE IECustomizer::ShowContextMenu(
 	/* [in] */ DWORD dwID,
 	/* [in] */ POINT __RPC_FAR *ppt,
 	/* [in] */ IUnknown __RPC_FAR *pcmdtReserved,
-	/* [in] */ IDispatch __RPC_FAR *pdispReserved){
-		if(g_param.debug){
-			return	S_FALSE;
-		}
+	/* [in] */ IDispatch __RPC_FAR *pdispReserved)
+{
+	if(g_param.debug){
+		return	S_FALSE;
+	}
 
-		switch( dwID )
-		{
-		case CONTEXT_MENU_CONTROL:
-		case CONTEXT_MENU_TEXTSELECT:
-		case CONTEXT_MENU_UNKNOWN:
-		case CONTEXT_MENU_VSCROLL:
-		case CONTEXT_MENU_HSCROLL:
-			return S_FALSE;
-		}
+	switch( dwID )
+	{
+	case CONTEXT_MENU_CONTROL:
+	case CONTEXT_MENU_TEXTSELECT:
+	case CONTEXT_MENU_UNKNOWN:
+	case CONTEXT_MENU_VSCROLL:
+	case CONTEXT_MENU_HSCROLL:
+		return S_FALSE;
+	}
 
-		return S_OK;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE IECustomizer::GetHostInfo(
@@ -82,10 +78,8 @@ HRESULT STDMETHODCALLTYPE IECustomizer::GetExternal(
 		return E_POINTER;
 	}
 
-	IDispatch*	disp	= (DispatchImpl*)this;
-	disp->AddRef();
-
-	*ppDispatch	= disp;
+	external_.AddRef();
+	*ppDispatch	= &external_;
 
 	return S_OK;
 }
