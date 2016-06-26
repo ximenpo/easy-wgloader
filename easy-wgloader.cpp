@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include "simple/app.h"
+#include "simple-win32/ie_download.h"
 
 //	config data
 stringify_data	g_config;
@@ -112,7 +113,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//
 	//	Main Procedure.
 	//
-
+	CoInitialize(NULL);
 	g_module.Init(NULL, hInstance);
 
 	{
@@ -127,6 +128,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			);
 	}
 
+	//	report
+	do
+	{
+		std::string	report	= g_config.get_value("config/report", "");
+		if(report.empty()) {
+			break;
+		}
+		IE_DownloadContentCallbacker	callback;
+		if(SUCCEEDED(URLOpenStreamA(NULL, report.c_str(), 0, &callback))){
+		}
+	}while(false);
+
+	// UIs.
 	do
 	{
 		//	login
@@ -156,6 +170,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}while(true);
 
 	g_module.Term();
+	CoUninitialize();
 
 	return (int) EXIT_SUCCESS;
 }
