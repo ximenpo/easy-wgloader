@@ -40,6 +40,16 @@ LoginDialog::~LoginDialog(void)
 
 
 void	LoginDialog::do_CloseWindow() {
+	char	title[MAX_PATH]	= {};
+	::GetWindowTextA(m_hWnd, title, sizeof(title) - 1);
+	
+	std::string	tip	= g_config.get_value("login/close_tip","");
+	string_trim(tip);
+
+	if(!tip.empty() && IDYES != ::MessageBoxA(m_hWnd, tip.c_str(), title, MB_YESNO|MB_DEFBUTTON2)){
+		return;
+	}
+
 	SetTimer(TIMER_CLOSEWINDOW, 0, NULL);
 }
 

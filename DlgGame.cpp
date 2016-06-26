@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "DlgGame.h"
 
+#include	"simple/string.h"
 
 GameDialog::GameDialog(void)
 	:	m_pWeb(NULL)
@@ -13,6 +14,16 @@ GameDialog::~GameDialog(void)
 }
 
 void	GameDialog::do_CloseWindow(){
+	char	title[MAX_PATH]	= {};
+	::GetWindowTextA(m_hWnd, title, sizeof(title) - 1);
+	
+	std::string	tip	= g_config.get_value("game/close_tip","");
+	string_trim(tip);
+
+	if(!tip.empty() && IDYES != ::MessageBoxA(m_hWnd, tip.c_str(), title, MB_YESNO|MB_DEFBUTTON2)){
+		return;
+	}
+
 	::EndDialog(m_hWnd, 0);
 }
 
