@@ -117,8 +117,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	{
 		g_param.clear_temporary_vars();
-		g_param.delay	= atoi(g_config.get_value("config/delay", "0").c_str());
-		g_param.title	= g_config.get_value("config/title", "");
+		g_param.delay		= atoi(g_config.get_value("config/delay", "0").c_str());
+		g_param.wnd_title	= g_config.get_value("config/title", "");
+		g_param.wnd_icon	= (HICON)::LoadImageA(NULL, 
+			g_config.get_value("config/icon", "").c_str(),
+			IMAGE_ICON,
+			0, 0,
+			LR_SHARED|LR_DEFAULTSIZE|LR_LOADFROMFILE
+			);
 	}
 
 	do

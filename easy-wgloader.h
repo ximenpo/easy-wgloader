@@ -5,7 +5,8 @@
 struct	Params{
 	bool			debug;		//	ÊÇ·ñµ÷ÊÔ×´Ì¬
 	
-	std::string		title;
+	std::string		wnd_title;
+	HICON			wnd_icon;
 
 	std::wstring	cs_REG_IE_OPTION;
 	std::wstring	cs_IsGameLoader;

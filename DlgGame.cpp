@@ -44,7 +44,12 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 		if(!g_param.game_title.empty()){
 			this->SetWindowTextW(g_param.game_title.c_str());
 		}else{
-			::SetWindowTextA(m_hWnd, g_param.title.c_str());
+			::SetWindowTextA(m_hWnd, g_param.wnd_title.c_str());
+		}
+		
+		if(NULL != g_param.wnd_icon) {
+			this->SetIcon(g_param.wnd_icon, TRUE);
+			this->SetIcon(g_param.wnd_icon, FALSE);
 		}
 	}
 

@@ -135,7 +135,11 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			MoveWindow(0, 0, w, h, FALSE);
 		}
 
-		::SetWindowTextA(m_hWnd, g_param.title.c_str());
+		::SetWindowTextA(m_hWnd, g_param.wnd_title.c_str());
+		if(NULL != g_param.wnd_icon) {
+			this->SetIcon(g_param.wnd_icon, TRUE);
+			this->SetIcon(g_param.wnd_icon, FALSE);
+		}
 		CenterWindow();
 	}
 
@@ -189,6 +193,12 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 				//	background image
 				m_pImageDlg	= new ImageDialog();
 				m_pImageDlg->Create(NULL);
+				m_pImageDlg->ShowWindow(SW_HIDE);
+				::SetWindowTextA(m_pImageDlg->m_hWnd, g_param.wnd_title.c_str());
+				if(NULL != g_param.wnd_icon) {
+					m_pImageDlg->SetIcon(g_param.wnd_icon, TRUE);
+					m_pImageDlg->SetIcon(g_param.wnd_icon, FALSE);
+				}
 				m_pImageDlg->UpdateImage(m_hWnd, m_memDC, g_config.get_value("login/title", "").c_str());
 
 				// no need now.
