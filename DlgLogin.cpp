@@ -135,7 +135,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			MoveWindow(0, 0, w, h, FALSE);
 		}
 
-		::SetWindowTextA(m_hWnd, g_config.get_value("login/title", "").c_str());
+		::SetWindowTextA(m_hWnd, g_param.title.c_str());
 		CenterWindow();
 	}
 

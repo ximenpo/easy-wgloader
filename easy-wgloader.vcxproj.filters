@@ -138,14 +138,14 @@
     <ClCompile Include="IECustomizer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\ie.cpp">
-      <Filter>simple-cpp-win32</Filter>
-    </ClCompile>
     <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\patcher.cpp">
       <Filter>simple-cpp-win32</Filter>
     </ClCompile>
     <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\atl\IEHostWindow.cpp">
       <Filter>simple-cpp-win32\atl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\ie_download.cpp">
+      <Filter>simple-cpp-win32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

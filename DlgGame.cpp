@@ -41,7 +41,11 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 
 	//	Title
 	{
-		this->SetWindowTextW(g_param.game_title.c_str());
+		if(!g_param.game_title.empty()){
+			this->SetWindowTextW(g_param.game_title.c_str());
+		}else{
+			::SetWindowTextA(m_hWnd, g_param.title.c_str());
+		}
 	}
 
 	//	IE Control

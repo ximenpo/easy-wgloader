@@ -118,6 +118,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	{
 		g_param.clear_temporary_vars();
 		g_param.delay	= atoi(g_config.get_value("config/delay", "0").c_str());
+		g_param.title	= g_config.get_value("config/title", "");
 	}
 
 	do
