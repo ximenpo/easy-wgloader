@@ -83,3 +83,20 @@ HRESULT STDMETHODCALLTYPE IECustomizer::GetExternal(
 
 	return S_OK;
 }
+
+
+HRESULT STDMETHODCALLTYPE	IECustomizer::ShowMessage(
+    /* [in] */ HWND hwnd,
+    /* [in] */ LPOLESTR lpstrText,
+    /* [in] */ LPOLESTR lpstrCaption,
+    /* [in] */ DWORD dwType,
+    /* [in] */ LPOLESTR lpstrHelpFile,
+    /* [in] */ DWORD dwHelpContext,
+    /* [out] */ LRESULT *plResult)
+{
+	if(g_param.debug){
+		return	S_FALSE;
+	}
+
+    return	S_OK;
+}

@@ -30,7 +30,7 @@ public:
 private:
 	IEExternal		external_;
 
-public:
+protected:
 	//·µ»ØS_OK£¬ÆÁ±ÎµôÓÒ¼ü²Ëµ¥
 	virtual HRESULT STDMETHODCALLTYPE		ShowContextMenu(
 		/* [in] */ DWORD dwID,
@@ -47,5 +47,16 @@ public:
 
 	virtual HRESULT STDMETHODCALLTYPE		GetExternal(
 		/* [out] */ IDispatch __RPC_FAR *__RPC_FAR *ppDispatch);
+
+protected:
+    // IDocHostShowUI Impls.
+    virtual HRESULT STDMETHODCALLTYPE ShowMessage(
+        /* [in] */ HWND hwnd,
+        /* [in] */ LPOLESTR lpstrText,
+        /* [in] */ LPOLESTR lpstrCaption,
+        /* [in] */ DWORD dwType,
+        /* [in] */ LPOLESTR lpstrHelpFile,
+        /* [in] */ DWORD dwHelpContext,
+        /* [out] */ LRESULT *plResult);
 };
 
