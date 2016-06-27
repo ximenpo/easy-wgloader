@@ -147,6 +147,9 @@
     <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\ie_download.cpp">
       <Filter>simple-cpp-win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\simple-cpp-win32\inc\simple-win32\mac.cpp">
+      <Filter>simple-cpp-win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="easy-wgloader.rc">

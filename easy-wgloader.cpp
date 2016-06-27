@@ -11,6 +11,7 @@
 
 #include "simple/app.h"
 #include "simple/string.h"
+#include "simple-win32/mac.h"
 #include "simple-win32/ie_download.h"
 
 //	config data
@@ -44,11 +45,11 @@ static	bool	Initialize(HINSTANCE hInstance)
 
 	//	System Strings
 	{
-		wchar_t	buf[MAX_PATH];			
+		wchar_t	buf[MAX_PATH];
 		LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
 		g_param.cs_REG_IE_OPTION.assign(buf);
 		LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
-		g_param.cs_IsGameLoader.assign(buf);			
+		g_param.cs_IsGameLoader.assign(buf);
 		LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
 		g_param.cs_LoadGame.assign(buf);
 
@@ -153,6 +154,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		if(report.empty()) {
 			break;
 		}
+
+		if(report.find_first_of("{}") != std::string::npos){
+			string_replace(report, "{MAC}", Mac_GetPhysicalAdapterMac());
+		}
+
 		class URLReportCallbacker	: public IE_DownloadCallbacker
 		{
 		public:
