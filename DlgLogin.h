@@ -42,6 +42,8 @@ private:
 
 public:
 	enum	{IDD = IDD_LOGIN};
+
+	bool	PreProcessKeyboardMessage(MSG* msg);
 	
 private:
 	enum	{IDC_BTN_FIRST	= 10000, IDC_BTN_LAST=10100};
@@ -67,7 +69,6 @@ private:
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-public:
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 };
 

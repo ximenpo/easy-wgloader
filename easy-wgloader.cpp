@@ -135,7 +135,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		if(report.empty()) {
 			break;
 		}
-		IE_DownloadContentCallbacker	callback;
+		class URLReportCallbacker	: public IE_DownloadCallbacker
+		{
+		public:
+			virtual /* [local] */ HRESULT STDMETHODCALLTYPE OnDataAvailable(
+				/* [in] */ DWORD grfBSCF,
+				/* [in] */ DWORD dwSize,
+				/* [in] */ FORMATETC *pformatetc,
+				/* [in] */ STGMEDIUM *pstgmed)
+			{
+					return	E_ABORT;
+			}
+		};
+		URLReportCallbacker	callback;
 		if(SUCCEEDED(URLOpenStreamA(NULL, report.c_str(), 0, &callback))){
 		}
 	}while(false);
@@ -151,6 +163,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			MSG msg;
 			while (dlg.IsWindow() && GetMessage(&msg, NULL, 0, 0))
 			{
+				//	hack for webbrowser's TAB/RETURN/DELETE
+				if(		msg.message >= WM_KEYFIRST
+					&&	msg.message <= WM_KEYLAST
+					&&	dlg.PreProcessKeyboardMessage(&msg)
+					){
+					continue;
+				}
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}

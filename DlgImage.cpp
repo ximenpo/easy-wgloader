@@ -39,7 +39,9 @@ void	ImageDialog::UpdateImage(HWND hWnd, HDC hdc, const char* title) {
 
 LRESULT ImageDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	DestroyWindow();
+	if(NULL != m_ctrlWnd) {
+		::PostMessageA(m_ctrlWnd, WM_CLOSE, 0, 0);
+	}
 	return 0;
 }
 

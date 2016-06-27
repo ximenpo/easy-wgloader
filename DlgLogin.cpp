@@ -30,7 +30,9 @@ LoginDialog::LoginDialog(void)
 LoginDialog::~LoginDialog(void)
 {
 	if(NULL != m_pImageDlg) {
-		m_pImageDlg->DestroyWindow();
+		if(m_pImageDlg->IsWindow()) {
+			m_pImageDlg->DestroyWindow();
+		}
 		delete	m_pImageDlg;
 		m_pImageDlg	= NULL;
 	}
@@ -42,7 +44,7 @@ LoginDialog::~LoginDialog(void)
 void	LoginDialog::do_CloseWindow() {
 	char	title[MAX_PATH]	= {};
 	::GetWindowTextA(m_hWnd, title, sizeof(title) - 1);
-	
+
 	std::string	tip	= g_config.get_value("login/close_tip","");
 	string_trim(tip);
 
@@ -204,12 +206,12 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 				m_pImageDlg	= new ImageDialog();
 				m_pImageDlg->Create(NULL);
 				m_pImageDlg->ShowWindow(SW_HIDE);
+				m_pImageDlg->UpdateImage(m_hWnd, m_memDC, g_config.get_value("login/title", "").c_str());
 				::SetWindowTextA(m_pImageDlg->m_hWnd, g_param.wnd_title.c_str());
 				if(NULL != g_param.wnd_icon) {
 					m_pImageDlg->SetIcon(g_param.wnd_icon, TRUE);
 					m_pImageDlg->SetIcon(g_param.wnd_icon, FALSE);
 				}
-				m_pImageDlg->UpdateImage(m_hWnd, m_memDC, g_config.get_value("login/title", "").c_str());
 
 				// no need now.
 				m_memDC.uninitialize();
@@ -371,4 +373,32 @@ LRESULT LoginDialog::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 {
 	this->do_CloseWindow();
 	return 0;
+}
+
+
+bool LoginDialog::PreProcessKeyboardMessage(MSG* msg) {
+	switch(msg->wParam) {
+	case VK_TAB:
+	case VK_DELETE:
+	case VK_RETURN:
+		{
+			// handled later
+		}break;
+	default:
+		{
+			return	false;
+		}break;
+	}
+
+	CComPtr<IDispatch> disp_doc;
+	if(FAILED(m_pWeb->get_Document(&disp_doc))) {
+		return	false;
+	}
+
+	CComQIPtr<IOleInPlaceActiveObject> spInPlace;  
+	if(FAILED(disp_doc->QueryInterface(__uuidof(IOleInPlaceActiveObject), (void**)&spInPlace))) {
+		return	false;
+	}
+
+	return	(spInPlace->TranslateAccelerator(msg) == S_OK); 
 }
