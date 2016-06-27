@@ -177,7 +177,8 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 	//	window style.
 	{
 		std::string	rgn	= g_config.get_value("login/rgn", "");
-		std::string	img_trans	= g_config.get_value("login/img_trans", "");
+		std::string	img_trans	= g_config.get_value("login/img_trans_rgb", "");
+		std::string	dlg_trans	= g_config.get_value("login/dlg_trans_rgb", "");
 
 		{
 			DWORD	wnd_ex_style	= this->GetExStyle() & ~WS_EX_LAYERED;
@@ -194,13 +195,14 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			if(!img_trans.empty()){
 				//	LayeredWindow with trans key
 				unsigned int	r(255),g(0),b(255);
-				if(string_tonumbers(img_trans, r, g, b)){
-					SetLayeredWindowAttributes(m_hWnd, RGB(r,g,b), 0, LWA_COLORKEY);
-				}
+				string_tonumbers(img_trans, r, g, b);
+				SetLayeredWindowAttributes(m_hWnd, RGB(r,g,b), 0, LWA_COLORKEY);
 			}else{
 				//	LayeredWindow with png, default.
-				m_hBrush	= ::CreateSolidBrush(RGB(255,0,255));
-				SetLayeredWindowAttributes(m_hWnd, RGB(255,0,255), 0, LWA_COLORKEY);
+				unsigned int	r(255),g(0),b(255);
+				string_tonumbers(dlg_trans, r, g, b);
+				m_hBrush	= ::CreateSolidBrush(RGB(r,g,b));
+				SetLayeredWindowAttributes(m_hWnd, RGB(r,g,b), 0, LWA_COLORKEY);
 
 				//	background image
 				m_pImageDlg	= new ImageDialog();
