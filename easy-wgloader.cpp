@@ -36,38 +36,21 @@ static	bool	Initialize(HINSTANCE hInstance)
 		s_config.assign(buf);
 
 		if(__argc >= 3) {
-			s_config_ex.assign(__argv[2]);
+			std::wstring	str(__wargv[2]);
+			s_config_ex.assign(string_wchar_to_ansi(str));
 		}
 		if(__argc >= 4) {
-			s_config_temp.assign(__argv[3]);
-		}
-	}
-
-	//	System Strings
-	{
-		wchar_t	buf[MAX_PATH];
-		LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
-		g_param.cs_REG_IE_OPTION.assign(buf);
-		LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
-		g_param.cs_IsGameLoader.assign(buf);
-		LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
-		g_param.cs_LoadGame.assign(buf);
-
-		std::string	data	= g_config.get_value("config/api_IsGameLoader","");
-		if(!data.empty()){
-			g_param.cs_IsGameLoader.assign(string_ansi_to_wchar(data));
-		}
-		data	= g_config.get_value("config/api_LoadGame","");
-		if(!data.empty()){
-			g_param.cs_LoadGame.assign(string_ansi_to_wchar(data));
+			std::wstring	str(__wargv[3]);
+			s_config_temp.assign(string_wchar_to_ansi(str));
 		}
 	}
 
 	::SetCurrentDirectoryA(app_dir().c_str());
 	std::string	cfg_dir(".\\");
 	if(__argc >= 2){
-		if(::PathIsDirectoryA(__argv[1])){
-			cfg_dir.assign(__argv[1]);
+		std::wstring	dir(__wargv[1]);
+		if(::PathIsDirectoryW(dir.c_str())) {
+			cfg_dir.assign(string_wchar_to_ansi(dir));
 			cfg_dir.append("\\");
 		}
 	}
@@ -108,6 +91,26 @@ static	bool	Initialize(HINSTANCE hInstance)
 		std::ifstream	ifs(cfg_dir + s_config);
 		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
 			return	false;
+		}
+	}
+	
+	//	System Strings
+	{
+		wchar_t	buf[MAX_PATH];
+		LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
+		g_param.cs_REG_IE_OPTION.assign(buf);
+		LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
+		g_param.cs_IsGameLoader.assign(buf);
+		LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
+		g_param.cs_LoadGame.assign(buf);
+
+		std::string	data	= g_config.get_value("config/api_IsGameLoader","");
+		if(!data.empty()){
+			g_param.cs_IsGameLoader.assign(string_ansi_to_wchar(data));
+		}
+		data	= g_config.get_value("config/api_LoadGame","");
+		if(!data.empty()){
+			g_param.cs_LoadGame.assign(string_ansi_to_wchar(data));
 		}
 	}
 
