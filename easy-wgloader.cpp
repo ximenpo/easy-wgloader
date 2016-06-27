@@ -10,12 +10,110 @@
 #include <fstream>
 
 #include "simple/app.h"
+#include "simple/string.h"
 #include "simple-win32/ie_download.h"
 
 //	config data
 stringify_data	g_config;
 Params			g_param;
 HINSTANCE		g_instace;
+
+//
+//	Initialize
+//
+static	bool	Initialize(HINSTANCE hInstance)
+{
+	//	config files' name
+	std::string	s_config, s_config_ex, s_config_temp;
+	{
+		char	buf[MAX_PATH];
+		LoadStringA(hInstance, IDS_CONFIG_TEMP, buf, MAX_PATH);
+		s_config_temp.assign(buf);
+		LoadStringA(hInstance, IDS_CONFIG_EX, buf, MAX_PATH);
+		s_config_ex.assign(buf);
+		LoadStringA(hInstance, IDS_CONFIG, buf, MAX_PATH);
+		s_config.assign(buf);
+
+		if(__argc >= 3) {
+			s_config_ex.assign(__argv[2]);
+		}
+		if(__argc >= 4) {
+			s_config_temp.assign(__argv[3]);
+		}
+	}
+
+	//	System Strings
+	{
+		wchar_t	buf[MAX_PATH];			
+		LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
+		g_param.cs_REG_IE_OPTION.assign(buf);
+		LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
+		g_param.cs_IsGameLoader.assign(buf);			
+		LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
+		g_param.cs_LoadGame.assign(buf);
+
+		std::string	data	= g_config.get_value("config/api_IsGameLoader","");
+		if(!data.empty()){
+			g_param.cs_IsGameLoader.assign(string_ansi_to_wchar(data));
+		}
+		data	= g_config.get_value("config/api_LoadGame","");
+		if(!data.empty()){
+			g_param.cs_LoadGame.assign(string_ansi_to_wchar(data));
+		}
+	}
+
+	::SetCurrentDirectoryA(app_dir().c_str());
+	std::string	cfg_dir(".\\");
+	if(__argc >= 2){
+		if(::PathIsDirectoryA(__argv[1])){
+			cfg_dir.assign(__argv[1]);
+			cfg_dir.append("\\");
+		}
+	}
+
+	//	debug options
+	{
+#ifndef	NDEBUG
+		cfg_dir	= "..\\bin\\";
+#endif
+		g_param.debug	= false;
+		if(::PathFileExistsA((cfg_dir + "debug.ini").c_str())) {
+			g_param.debug	= true;
+		}
+	}
+
+	//	first config(overide extend and normal)
+	if(::PathFileExistsA((cfg_dir + s_config_temp).c_str())){
+		std::ifstream	ifs(cfg_dir + s_config_temp);
+		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+			//	ignore errors ...
+		}
+
+		if(!g_param.debug) {
+			DeleteFileA((cfg_dir + s_config_temp).c_str());
+		}
+	}
+
+	//	exttend	config(overide normal)
+	if(::PathFileExistsA((cfg_dir + s_config_ex).c_str())){
+		std::ifstream	ifs(cfg_dir + s_config_ex);
+		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+			//	ignore errors ...
+		}
+	}
+
+	//	global config
+	{
+		std::ifstream	ifs(cfg_dir + s_config);
+		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+			return	false;
+		}
+	}
+
+	::SetCurrentDirectoryA(cfg_dir.c_str());
+
+	return	true;
+}
 
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -26,88 +124,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	//
-	//	Initialize
-	//
-	{
-		//	config files' name
-		std::string	s_config, s_config_ex, s_config_temp;
-		{
-			char	buf[MAX_PATH];
-			LoadStringA(hInstance, IDS_CONFIG_TEMP, buf, MAX_PATH);
-			s_config_temp.assign(buf);
-			LoadStringA(hInstance, IDS_CONFIG_EX, buf, MAX_PATH);
-			s_config_ex.assign(buf);
-			LoadStringA(hInstance, IDS_CONFIG, buf, MAX_PATH);
-			s_config.assign(buf);
-
-			if(__argc >= 3) {
-				s_config_ex.assign(__argv[2]);
-			}
-			if(__argc >= 4) {
-				s_config_temp.assign(__argv[3]);
-			}
-		}
-
-		//	System Strings
-		{
-			wchar_t	buf[MAX_PATH];			
-			LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
-			g_param.cs_REG_IE_OPTION.assign(buf);
-			LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
-			g_param.cs_IsGameLoader.assign(buf);			
-			LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
-			g_param.cs_LoadGame.assign(buf);
-		}
-
-		::SetCurrentDirectoryA(app_dir().c_str());
-		std::string	cfg_dir(".\\");
-		if(__argc >= 2){
-			if(::PathIsDirectoryA(__argv[1])){
-				cfg_dir.assign(__argv[1]);
-				cfg_dir.append("\\");
-			}
-		}
-
-		//	debug options
-		{
-#ifndef	NDEBUG
-			cfg_dir	= "..\\bin\\";
-#endif
-			g_param.debug	= false;
-			if(::PathFileExistsA((cfg_dir + "debug.ini").c_str())) {
-				g_param.debug	= true;
-			}
-		}
-
-		//	first config(overide extend and normal)
-		if(::PathFileExistsA((cfg_dir + s_config_temp).c_str())){
-			std::ifstream	ifs(cfg_dir + s_config_temp);
-			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
-				//	ignore errors ...
-			}
-
-			if(!g_param.debug) {
-				DeleteFileA((cfg_dir + s_config_temp).c_str());
-			}
-		}
-
-		//	exttend	config(overide normal)
-		if(::PathFileExistsA((cfg_dir + s_config_ex).c_str())){
-			std::ifstream	ifs(cfg_dir + s_config_ex);
-			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
-				//	ignore errors ...
-			}
-		}
-
-		//	global config
-		{
-			std::ifstream	ifs(cfg_dir + s_config);
-			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
-				return	EXIT_FAILURE;
-			}
-		}
-		::SetCurrentDirectoryA(cfg_dir.c_str());
+	if(!Initialize(hInstance)){
+		return	EXIT_FAILURE;
 	}
 
 	//
@@ -144,7 +162,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				/* [in] */ FORMATETC *pformatetc,
 				/* [in] */ STGMEDIUM *pstgmed)
 			{
-					return	E_ABORT;
+				return	E_ABORT;
 			}
 		};
 		URLReportCallbacker	callback;
@@ -168,7 +186,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					&&	msg.message <= WM_KEYLAST
 					&&	dlg.PreProcessKeyboardMessage(&msg)
 					){
-					continue;
+						continue;
 				}
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
