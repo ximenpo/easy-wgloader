@@ -355,7 +355,12 @@ LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 	return 0;
 }
 
-LRESULT LoginDialog::OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+LRESULT LoginDialog::OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
+	if(NULL != m_pImageDlg){
+		bHandled	= false;
+		return	0;
+	}
+
 	return HTCAPTION;
 }
 
