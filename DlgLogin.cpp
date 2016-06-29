@@ -276,7 +276,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		}
 
 		{
-			//m_IECustomizer.SetExternalDispatch((DispatchImpl*)this);
+			m_pWeb->put_Resizable(VARIANT_FALSE);
 		}
 
 		//	debug

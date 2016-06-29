@@ -68,6 +68,10 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	{
 		m_ctrlWeb	= GetDlgItem(IDC_WEB);
 		m_ctrlWeb.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWeb);
+		
+		{
+			m_pWeb->put_Resizable(VARIANT_FALSE);
+		}
 
 		{
 			CComVariant	sURL(g_param.game_url.c_str());
