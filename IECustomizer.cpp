@@ -2,7 +2,7 @@
 #include "IECustomizer.h"
 
 void	IEExternal::do_IsGameLoader(_variant_t& ret) {
-	ret	= VARIANT_TRUE;
+	ret	= true;
 }
 
 void	IEExternal::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) {
@@ -11,7 +11,7 @@ void	IEExternal::do_LoadGame(_variant_t url, _variant_t title, _variant_t& ret) 
 
 	::SendMessageA(g_param.main_wnd, WM_CLOSE, 0, 0);
 
-	ret	= VARIANT_TRUE;
+	ret	= true;
 }
 
 
