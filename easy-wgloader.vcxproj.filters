@@ -38,10 +38,13 @@
     </None>
     <None Include="copy-releases.cmd" />
     <None Include="copy-testdata.cmd" />
-    <None Include="bin\first.ini">
+    <None Include="bin\wgloader.ini">
       <Filter>example</Filter>
     </None>
-    <None Include="bin\config.ini">
+    <None Include="bin\wgloader_ex.ini">
+      <Filter>example</Filter>
+    </None>
+    <None Include="bin\wgloader_temp.ini">
       <Filter>example</Filter>
     </None>
   </ItemGroup>
