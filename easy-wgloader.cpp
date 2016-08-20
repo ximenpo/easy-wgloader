@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "easy-wgloader.h"
 
+#include "IECustomizer.h"
 #include "DlgLogin.h"
 #include "DlgGame.h"
 
@@ -212,6 +213,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}while(false);
 
+	IEHostWindow::patch_atl_creator_CAxHostWindow(&IECustomizer::_CreatorClass::CreateInstance);
+
 	// UIs.
 	do
 	{
@@ -247,6 +250,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		g_param.clear_temporary_vars();
 	}while(true);
+	
+	IEHostWindow::unpatch_atl_creator_CAxHostWindow();
 
 	g_module.Term();
 	CoUninitialize();

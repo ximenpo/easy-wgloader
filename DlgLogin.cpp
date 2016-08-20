@@ -4,7 +4,6 @@
 #include	<ShellAPI.h>
 
 #include	"DlgImage.h"
-#include	"IECustomizer.h"
 
 #include	"simple/string.h"
 #include	"simple-win32/res.h"
@@ -13,8 +12,7 @@
 #include	"simple-win32/atl/ImageButton.h"
 
 enum{
-	TIMER_NAVIGATE	= 101,
-	TIMER_SHOWWINDOW,
+	TIMER_SHOWWINDOW	= 101,
 	TIMER_CLOSEWINDOW,
 };
 
@@ -24,7 +22,6 @@ LoginDialog::LoginDialog(void)
 	,	m_hBrush(NULL)
 	,	m_pImageDlg(NULL)
 {
-	IEHostWindow::patch_atl_creator_CAxHostWindow(&IECustomizer::_CreatorClass::CreateInstance);
 }
 
 
@@ -37,8 +34,6 @@ LoginDialog::~LoginDialog(void)
 		delete	m_pImageDlg;
 		m_pImageDlg	= NULL;
 	}
-
-	IEHostWindow::unpatch_atl_creator_CAxHostWindow();
 }
 
 
@@ -295,7 +290,7 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		}
 	}
 
-	SetTimer(TIMER_NAVIGATE, 0, NULL);
+	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
 	return TRUE;
 }
 
@@ -345,14 +340,6 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	switch(wParam){
-	case TIMER_NAVIGATE:
-		{
-			KillTimer(TIMER_NAVIGATE);
-			CComVariant	sURL(string_ansi_to_wchar(g_config.get_value("login/url", "about:blank"), NULL));
-			m_pWeb->Navigate2(&sURL,0,0,0,0);
-
-			SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
-		}break;
 	case TIMER_SHOWWINDOW:
 		{
 			KillTimer(TIMER_SHOWWINDOW);
@@ -430,25 +417,33 @@ void __stdcall LoginDialog::OnWebDownloadComplete()
 	if(NULL == m_pWeb || g_param.auth_code.empty()) {
 		return;
 	}
-	
-	CComPtr<IDispatch> disp_doc;
-	if(FAILED(m_pWeb->get_Document(&disp_doc))) {
-		return;
-	}
-	
-	CComQIPtr<IHTMLDocument2> pdoc(disp_doc);
-	if(NULL == pdoc) {
-		return;
+
+	bool	is_http_protocol	= false;
+	{
+		CComBSTR	url;
+		if(		SUCCEEDED(m_pWeb->get_LocationURL(&url))
+			&&	(0 == StrCmpNIW(url, L"http://", 7) || 0 == StrCmpNIW(url, L"https://", 8))
+			){
+				is_http_protocol	= true;
+		}
 	}
 
-	CComBSTR	cookie(string_format("%s=%s;path=%s;domain=%s",
-		g_param.cs_AUTH_COOKIE_NAME.c_str(), g_param.auth_code.c_str(),
-		"/", g_param.cs_AUTH_COOKIE_DOMAIN.c_str()
-		).c_str());
-	if(FAILED(pdoc->put_cookie(cookie))){
-		return;
+	if(is_http_protocol && !g_param.auth_code.empty()){
+		CComBSTR	cookie(string_format("%s=%s;path=%s;domain=%s",
+			g_param.cs_AUTH_COOKIE_NAME.c_str(), g_param.auth_code.c_str(),
+			"/", g_param.cs_AUTH_COOKIE_DOMAIN.c_str()
+			).c_str());
+
+		CComPtr<IDispatch> disp_doc;
+		if(FAILED(m_pWeb->get_Document(&disp_doc))) {
+			return;
+		}
+
+		CComQIPtr<IHTMLDocument2> pdoc(disp_doc);
+		if(NULL != pdoc && SUCCEEDED(pdoc->put_cookie(cookie))){
+			g_param.auth_code.clear();
+		}
 	}
-	g_param.auth_code.clear();
 }
 
 
