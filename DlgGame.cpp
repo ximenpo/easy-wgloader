@@ -156,6 +156,9 @@ void __stdcall GameDialog::BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* UR
 		return;
 	}
 
+	//	process http/https request, ignore res/about/...
 	CComVariant	url(*URL);
-	::ShellExecute(NULL, L"open", url.bstrVal, NULL, NULL, SW_SHOWNORMAL);
+	if(0 == StrCmpNIW(url.bstrVal, L"http://", 7) || 0 == StrCmpNIW(url.bstrVal, L"https://", 8)){
+		::ShellExecute(NULL, L"open", url.bstrVal, NULL, NULL, SW_SHOWNORMAL);
+	}
 }
