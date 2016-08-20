@@ -20,6 +20,7 @@ enum{
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
+	,	m_pWebDummy(NULL)
 	,	m_hBrush(NULL)
 	,	m_pImageDlg(NULL)
 {
@@ -284,6 +285,15 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			m_pWeb->put_Silent(g_param.debug ? VARIANT_FALSE : VARIANT_TRUE);
 		}
 	}
+	//	Dummy IE Control
+	{
+		m_ctrlWebDummy	= GetDlgItem(IDC_WEB_DUMMY);
+		m_ctrlWebDummy.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWebDummy);
+
+		{
+			m_ctrlWebDummy.MoveWindow(-100, -100, 50, 50, FALSE);
+		}
+	}
 
 	SetTimer(TIMER_NAVIGATE, 0, NULL);
 	return TRUE;
@@ -297,6 +307,11 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		if(NULL != m_pWeb){
 			m_pWeb->Stop();
 			m_pWeb->Release(); 
+		}
+
+		if(NULL != m_pWebDummy){
+			m_pWebDummy->Stop();
+			m_pWebDummy->Release(); 
 		}
 	}
 
@@ -434,4 +449,28 @@ void __stdcall LoginDialog::OnWebDownloadComplete()
 		return;
 	}
 	g_param.auth_code.clear();
+}
+
+
+void __stdcall LoginDialog::NewWindow2Web(LPDISPATCH* ppDisp, BOOL* Cancel)
+{
+	bool	custom_new_window	= true;
+	std::string	str	= g_config.get_value("login/custom_new_web_window", "true");
+	if(string_tobool(str, custom_new_window) && custom_new_window){
+		m_pWebDummy->get_Application(ppDisp);
+	}
+}
+
+
+void __stdcall LoginDialog::BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel)
+{
+	*Cancel	= TRUE;
+
+	//	ignore POST request.
+	if( NULL != PostData && PostData->vt == (VT_VARIANT|VT_BYREF) && PostData->pvarVal->vt != VT_EMPTY){
+		return;
+	}
+
+	CComVariant	url(*URL);
+	::ShellExecute(NULL, L"open", url.bstrVal, NULL, NULL, SW_SHOWNORMAL);
 }

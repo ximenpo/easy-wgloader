@@ -13,7 +13,8 @@ class	ImageButton;
 
 class LoginDialog :
 	public CAxDialogImpl<LoginDialog, CAxWindow>,
-	public IDispEventImpl<IDC_WEB,LoginDialog>
+	public IDispEventImpl<IDC_WEB,LoginDialog>,
+	public IDispEventImpl<IDC_WEB_DUMMY,LoginDialog>
 {
 public:
 	LoginDialog(void);
@@ -26,6 +27,9 @@ protected:
 private: 
 	CAxWindow		m_ctrlWeb;
 	IWebBrowser2*	m_pWeb;
+	
+	CAxWindow		m_ctrlWebDummy;
+	IWebBrowser2*	m_pWebDummy;
 
 	HBRUSH			m_hBrush;
 	ImageDialog*	m_pImageDlg;
@@ -75,7 +79,11 @@ private:
 public:
 	BEGIN_SINK_MAP(LoginDialog)
 		SINK_ENTRY(IDC_WEB, 104, OnWebDownloadComplete)
+		SINK_ENTRY(IDC_WEB, 251, NewWindow2Web)
+		SINK_ENTRY(IDC_WEB_DUMMY, 250, BeforeNavigate2WebDummy)
 	END_SINK_MAP()
 	void __stdcall OnWebDownloadComplete();
+	void __stdcall NewWindow2Web(LPDISPATCH* ppDisp, BOOL* Cancel);
+	void __stdcall BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel);
 };
 
