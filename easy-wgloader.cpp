@@ -96,13 +96,25 @@ static	bool	Initialize(HINSTANCE hInstance)
 	
 	//	System Strings
 	{
-		wchar_t	buf[MAX_PATH];
-		LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
-		g_param.cs_REG_IE_OPTION.assign(buf);
-		LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
-		g_param.cs_IsGameLoader.assign(buf);
-		LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
-		g_param.cs_LoadGame.assign(buf);
+		{
+			wchar_t	buf[MAX_PATH];
+			LoadStringW(hInstance, IDS_REG_IE_OPTION, buf, MAX_PATH);
+			g_param.cs_REG_IE_OPTION.assign(buf);
+			LoadStringW(hInstance, IDS_IsGameLoader, buf, MAX_PATH);
+			g_param.cs_IsGameLoader.assign(buf);
+			LoadStringW(hInstance, IDS_LoadGame, buf, MAX_PATH);
+			g_param.cs_LoadGame.assign(buf);
+		}
+
+		{
+			char	abuf[MAX_PATH];
+			LoadStringA(hInstance, IDS_AUTH_ENV_NAME, abuf, MAX_PATH);
+			g_param.cs_AUTH_ENV_NAME.assign(abuf);
+			LoadStringA(hInstance, IDS_AUTH_COOKIE_NAME, abuf, MAX_PATH);
+			g_param.cs_AUTH_COOKIE_NAME.assign(abuf);
+			LoadStringA(hInstance, IDS_AUTH_COOKIE_DOMAIN, abuf, MAX_PATH);
+			g_param.cs_AUTH_COOKIE_DOMAIN.assign(abuf);
+		}
 
 		std::string	data	= g_config.get_value("config/api_IsGameLoader","");
 		if(!data.empty()){
@@ -111,6 +123,26 @@ static	bool	Initialize(HINSTANCE hInstance)
 		data	= g_config.get_value("config/api_LoadGame","");
 		if(!data.empty()){
 			g_param.cs_LoadGame.assign(string_ansi_to_wchar(data));
+		}
+		data	= g_config.get_value("config/auth_EnvGame","");
+		if(!data.empty()){
+			g_param.cs_AUTH_ENV_NAME.assign(data);
+		}
+		data	= g_config.get_value("config/auth_CookieGame","");
+		if(!data.empty()){
+			g_param.cs_AUTH_COOKIE_NAME.assign(data);
+		}
+		data	= g_config.get_value("config/auth_CookieDomain","");
+		if(!data.empty()){
+			g_param.cs_AUTH_COOKIE_DOMAIN.assign(data);
+		}
+	}
+
+	//	auth code from env
+	{
+		char buf[MAX_PATH]	= {0};
+		if(GetEnvironmentVariableA(g_param.cs_AUTH_ENV_NAME.c_str(), buf, sizeof(buf)) > 0) {
+			g_param.auth_code.assign(buf);
 		}
 	}
 

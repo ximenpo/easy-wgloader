@@ -12,7 +12,8 @@ class	ImageDialog;
 class	ImageButton;
 
 class LoginDialog :
-	public CAxDialogImpl<LoginDialog, CAxWindow>
+	public CAxDialogImpl<LoginDialog, CAxWindow>,
+	public IDispEventImpl<IDC_WEB,LoginDialog>
 {
 public:
 	LoginDialog(void);
@@ -70,5 +71,11 @@ private:
 	LRESULT OnNCHitTest(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+
+public:
+	BEGIN_SINK_MAP(LoginDialog)
+		SINK_ENTRY(IDC_WEB, 104, OnWebDownloadComplete)
+	END_SINK_MAP()
+	void __stdcall OnWebDownloadComplete();
 };
 

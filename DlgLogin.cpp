@@ -409,3 +409,29 @@ bool LoginDialog::PreProcessKeyboardMessage(MSG* msg) {
 
 	return	(spInPlace->TranslateAccelerator(msg) == S_OK); 
 }
+
+void __stdcall LoginDialog::OnWebDownloadComplete()
+{
+	if(NULL == m_pWeb || g_param.auth_code.empty()) {
+		return;
+	}
+	
+	CComPtr<IDispatch> disp_doc;
+	if(FAILED(m_pWeb->get_Document(&disp_doc))) {
+		return;
+	}
+	
+	CComQIPtr<IHTMLDocument2> pdoc(disp_doc);
+	if(NULL == pdoc) {
+		return;
+	}
+
+	CComBSTR	cookie(string_format("%s=%s;path=%s;domain=%s",
+		g_param.cs_AUTH_COOKIE_NAME.c_str(), g_param.auth_code.c_str(),
+		"/", g_param.cs_AUTH_COOKIE_DOMAIN.c_str()
+		).c_str());
+	if(FAILED(pdoc->put_cookie(cookie))){
+		return;
+	}
+	g_param.auth_code.clear();
+}
