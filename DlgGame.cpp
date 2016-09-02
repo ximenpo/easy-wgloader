@@ -1,10 +1,13 @@
 #include "StdAfx.h"
 #include "DlgGame.h"
 
+#include	<ShellApi.h>
+
 #include	"simple/string.h"
 
 GameDialog::GameDialog(void)
 	:	m_pWeb(NULL)
+	,	m_pWebDummy(NULL)
 {
 }
 
@@ -75,7 +78,16 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 
 		{
 			CComVariant	sURL(g_param.game_url.c_str());
-			m_pWeb->Navigate2(&sURL,0,0,0,0);
+			m_pWeb->Navigate2(&sURL, 0, 0, 0, 0);
+		}
+	}
+	//	Dummy IE Control
+	{
+		m_ctrlWebDummy	= GetDlgItem(IDC_WEB_DUMMY);
+		m_ctrlWebDummy.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWebDummy);
+
+		{
+			m_ctrlWebDummy.MoveWindow(-100, -100, 50, 50, FALSE);
 		}
 	}
 
@@ -92,6 +104,11 @@ LRESULT GameDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 		if(NULL != m_pWeb){
 			m_pWeb->Stop();
 			m_pWeb->Release(); 
+		}
+
+		if(NULL != m_pWebDummy){
+			m_pWebDummy->Stop();
+			m_pWebDummy->Release(); 
 		}
 	}
 
@@ -117,4 +134,31 @@ LRESULT GameDialog::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
 {
 	this->do_CloseWindow();
 	return 0;
+}
+
+
+void __stdcall GameDialog::NewWindow2Web(LPDISPATCH* ppDisp, BOOL* Cancel)
+{
+	bool	custom_new_window	= true;
+	std::string	str	= g_config.get_value("game/custom_new_web_window", "true");
+	if(string_tobool(str, custom_new_window) && custom_new_window){
+		m_pWebDummy->get_Application(ppDisp);
+	}
+}
+
+
+void __stdcall GameDialog::BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel)
+{
+	*Cancel	= TRUE;
+
+	//	ignore POST request.
+	if( NULL != PostData && PostData->vt == (VT_VARIANT|VT_BYREF) && PostData->pvarVal->vt != VT_EMPTY){
+		return;
+	}
+
+	//	process http/https request, ignore res/about/...
+	CComVariant	url(*URL);
+	if(0 == StrCmpNIW(url.bstrVal, L"http://", 7) || 0 == StrCmpNIW(url.bstrVal, L"https://", 8)){
+		::ShellExecute(NULL, L"open", url.bstrVal, NULL, NULL, SW_SHOWNORMAL);
+	}
 }

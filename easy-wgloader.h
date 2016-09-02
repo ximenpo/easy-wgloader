@@ -8,9 +8,15 @@ struct	Params{
 	std::string		wnd_title;
 	HICON			wnd_icon;
 
+	std::string		auth_code;
+
 	std::wstring	cs_REG_IE_OPTION;
 	std::wstring	cs_IsGameLoader;
 	std::wstring	cs_LoadGame;
+
+	std::string		cs_AUTH_ENV_NAME;
+	std::string		cs_AUTH_COOKIE_NAME;
+	std::string		cs_AUTH_COOKIE_DOMAIN;
 	
 	//	temporary vars
 	unsigned int	delay;		//	第一次延迟显示时间（秒）

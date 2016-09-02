@@ -5,7 +5,9 @@
 #include "easy-wgloader.h"
 
 class GameDialog :
-	public CAxDialogImpl<GameDialog, CAxWindow>
+	public CAxDialogImpl<GameDialog, CAxWindow>,
+	public IDispEventImpl<IDC_WEB,GameDialog>,
+	public IDispEventImpl<IDC_WEB_DUMMY,GameDialog>
 {
 public:
 	GameDialog(void);
@@ -21,6 +23,9 @@ private:
 private: 
 	CAxWindow		m_ctrlWeb;
 	IWebBrowser2*	m_pWeb;
+	
+	CAxWindow		m_ctrlWebDummy;
+	IWebBrowser2*	m_pWebDummy;
 
 public:
 	enum	{IDD = IDD_GAME};
@@ -40,5 +45,12 @@ private:
     LRESULT OnEraseBkgnd(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+public:
+	BEGIN_SINK_MAP(GameDialog)
+		SINK_ENTRY(IDC_WEB, 251, NewWindow2Web)
+		SINK_ENTRY(IDC_WEB_DUMMY, 250, BeforeNavigate2WebDummy)
+	END_SINK_MAP()
+	void __stdcall NewWindow2Web(LPDISPATCH* ppDisp, BOOL* Cancel);
+	void __stdcall BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel);
 };
 

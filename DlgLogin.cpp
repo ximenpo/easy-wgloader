@@ -4,7 +4,6 @@
 #include	<ShellAPI.h>
 
 #include	"DlgImage.h"
-#include	"IECustomizer.h"
 
 #include	"simple/string.h"
 #include	"simple-win32/res.h"
@@ -13,17 +12,16 @@
 #include	"simple-win32/atl/ImageButton.h"
 
 enum{
-	TIMER_NAVIGATE	= 101,
-	TIMER_SHOWWINDOW,
+	TIMER_SHOWWINDOW	= 101,
 	TIMER_CLOSEWINDOW,
 };
 
 LoginDialog::LoginDialog(void)
 	:	m_pWeb(NULL)
+	,	m_pWebDummy(NULL)
 	,	m_hBrush(NULL)
 	,	m_pImageDlg(NULL)
 {
-	IEHostWindow::patch_atl_creator_CAxHostWindow(&IECustomizer::_CreatorClass::CreateInstance);
 }
 
 
@@ -36,8 +34,6 @@ LoginDialog::~LoginDialog(void)
 		delete	m_pImageDlg;
 		m_pImageDlg	= NULL;
 	}
-
-	IEHostWindow::unpatch_atl_creator_CAxHostWindow();
 }
 
 
@@ -284,8 +280,17 @@ LRESULT LoginDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 			m_pWeb->put_Silent(g_param.debug ? VARIANT_FALSE : VARIANT_TRUE);
 		}
 	}
+	//	Dummy IE Control
+	{
+		m_ctrlWebDummy	= GetDlgItem(IDC_WEB_DUMMY);
+		m_ctrlWebDummy.QueryControl(__uuidof(IWebBrowser2), (void**)&m_pWebDummy);
 
-	SetTimer(TIMER_NAVIGATE, 0, NULL);
+		{
+			m_ctrlWebDummy.MoveWindow(-100, -100, 50, 50, FALSE);
+		}
+	}
+
+	SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
 	return TRUE;
 }
 
@@ -297,6 +302,11 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		if(NULL != m_pWeb){
 			m_pWeb->Stop();
 			m_pWeb->Release(); 
+		}
+
+		if(NULL != m_pWebDummy){
+			m_pWebDummy->Stop();
+			m_pWebDummy->Release(); 
 		}
 	}
 
@@ -330,14 +340,6 @@ LRESULT LoginDialog::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT LoginDialog::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	switch(wParam){
-	case TIMER_NAVIGATE:
-		{
-			KillTimer(TIMER_NAVIGATE);
-			CComVariant	sURL(string_ansi_to_wchar(g_config.get_value("login/url", "about:blank"), NULL));
-			m_pWeb->Navigate2(&sURL,0,0,0,0);
-
-			SetTimer(TIMER_SHOWWINDOW, g_param.delay, NULL);
-		}break;
 	case TIMER_SHOWWINDOW:
 		{
 			KillTimer(TIMER_SHOWWINDOW);
@@ -408,4 +410,65 @@ bool LoginDialog::PreProcessKeyboardMessage(MSG* msg) {
 	}
 
 	return	(spInPlace->TranslateAccelerator(msg) == S_OK); 
+}
+
+void __stdcall LoginDialog::OnWebDownloadComplete()
+{
+	if(NULL == m_pWeb || g_param.auth_code.empty()) {
+		return;
+	}
+
+	bool	is_http_protocol	= false;
+	{
+		CComBSTR	url;
+		if(		SUCCEEDED(m_pWeb->get_LocationURL(&url))
+			&&	(0 == StrCmpNIW(url, L"http://", 7) || 0 == StrCmpNIW(url, L"https://", 8))
+			){
+				is_http_protocol	= true;
+		}
+	}
+
+	if(is_http_protocol && !g_param.auth_code.empty()){
+		CComBSTR	cookie(string_format("%s=%s;path=%s;domain=%s",
+			g_param.cs_AUTH_COOKIE_NAME.c_str(), g_param.auth_code.c_str(),
+			"/", g_param.cs_AUTH_COOKIE_DOMAIN.c_str()
+			).c_str());
+
+		CComPtr<IDispatch> disp_doc;
+		if(FAILED(m_pWeb->get_Document(&disp_doc))) {
+			return;
+		}
+
+		CComQIPtr<IHTMLDocument2> pdoc(disp_doc);
+		if(NULL != pdoc && SUCCEEDED(pdoc->put_cookie(cookie))){
+			g_param.auth_code.clear();
+		}
+	}
+}
+
+
+void __stdcall LoginDialog::NewWindow2Web(LPDISPATCH* ppDisp, BOOL* Cancel)
+{
+	bool	custom_new_window	= true;
+	std::string	str	= g_config.get_value("login/custom_new_web_window", "true");
+	if(string_tobool(str, custom_new_window) && custom_new_window){
+		m_pWebDummy->get_Application(ppDisp);
+	}
+}
+
+
+void __stdcall LoginDialog::BeforeNavigate2WebDummy(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel)
+{
+	*Cancel	= TRUE;
+
+	//	ignore POST request.
+	if( NULL != PostData && PostData->vt == (VT_VARIANT|VT_BYREF) && PostData->pvarVal->vt != VT_EMPTY){
+		return;
+	}
+
+	//	process http/https request, ignore res/about/...
+	CComVariant	url(*URL);
+	if(0 == StrCmpNIW(url.bstrVal, L"http://", 7) || 0 == StrCmpNIW(url.bstrVal, L"https://", 8)){
+		::ShellExecute(NULL, L"open", url.bstrVal, NULL, NULL, SW_SHOWNORMAL);
+	}
 }

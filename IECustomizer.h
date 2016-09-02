@@ -25,13 +25,13 @@ public:
 	~IECustomizer(void);
 
 public:
-	DECLARE_POLY_AGGREGATABLE(IECustomizer);
-
-private:
 	static	bool	get_use_external_object();
 	static	void	set_use_external_object(bool use_external);
 
 public:
+	DECLARE_POLY_AGGREGATABLE(IECustomizer);
+
+private:
 	IEExternal		external_;
 
 protected:

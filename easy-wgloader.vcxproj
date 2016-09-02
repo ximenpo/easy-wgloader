@@ -85,8 +85,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="bin\config.ini" />
-    <None Include="bin\first.ini" />
+    <None Include="bin\wgloader.ini" />
+    <None Include="bin\wgloader_ex.ini" />
+    <None Include="bin\wgloader_temp.ini" />
     <None Include="copy-releases.cmd" />
     <None Include="copy-testdata.cmd" />
     <None Include="easy-wgloader.ico" />
