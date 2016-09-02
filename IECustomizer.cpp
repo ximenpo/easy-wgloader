@@ -23,6 +23,15 @@ IECustomizer::~IECustomizer(void)
 {
 }
 
+static	bool	gs_use_external_object	= false;
+bool	IECustomizer::get_use_external_object(){
+	return	gs_use_external_object;
+}
+
+void	IECustomizer::set_use_external_object(bool use_external_object){
+	gs_use_external_object	= use_external_object;
+}
+
 //·µ»ØS_OK£¬ÆÁ±ÎµôÓÒ¼ü²Ëµ¥
 HRESULT STDMETHODCALLTYPE IECustomizer::ShowContextMenu(
 	/* [in] */ DWORD dwID,
@@ -77,8 +86,10 @@ HRESULT STDMETHODCALLTYPE IECustomizer::GetExternal(
 		return E_POINTER;
 	}
 
-	external_.AddRef();
-	*ppDispatch	= &external_;
+	if(gs_use_external_object) {
+		external_.AddRef();
+		*ppDispatch	= &external_;
+	}
 
 	return S_OK;
 }

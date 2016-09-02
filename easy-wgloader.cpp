@@ -185,6 +185,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	{
 		//	login
 		{
+			IECustomizer::set_use_external_object(true);
+
 			LoginDialog	dlg;
 			dlg.Create(NULL);
 
@@ -209,6 +211,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 		//	game
 		{
+			IECustomizer::set_use_external_object(false);
+
 			GameDialog	dlg;
 			dlg.DoModal(NULL);
 		}
