@@ -80,6 +80,11 @@ LRESULT GameDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 			CComVariant	sURL(g_param.game_url.c_str());
 			m_pWeb->Navigate2(&sURL, 0, 0, 0, 0);
 		}
+
+		//	debug
+		{
+			m_pWeb->put_Silent(g_param.debug ? VARIANT_FALSE : VARIANT_TRUE);
+		}
 	}
 	//	Dummy IE Control
 	{
