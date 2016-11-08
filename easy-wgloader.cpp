@@ -249,7 +249,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			IECustomizer::set_use_external_object(false);
 
 			GameDialog	dlg;
-			dlg.DoModal(NULL);
+			dlg.Create(NULL);
+
+			MSG msg;
+			while (dlg.IsWindow() && GetMessage(&msg, NULL, 0, 0))
+			{
+				//	hack for webbrowser's TAB/RETURN/DELETE
+				if(		msg.message >= WM_KEYFIRST
+					&&	msg.message <= WM_KEYLAST
+					&&	dlg.PreProcessKeyboardMessage(&msg)
+					){
+						continue;
+				}
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
 
 		g_param.clear_temporary_vars();
