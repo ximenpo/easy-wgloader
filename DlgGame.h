@@ -29,6 +29,10 @@ private:
 
 public:
 	enum	{IDD = IDD_GAME};
+
+	bool	PreProcessKeyboardMessage(MSG* msg);
+
+public:
 	BEGIN_MSG_MAP(thisClass)
 		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
 		MESSAGE_HANDLER(WM_SIZE, OnSize)

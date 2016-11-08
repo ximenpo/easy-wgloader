@@ -27,7 +27,7 @@ void	GameDialog::do_CloseWindow(){
 		return;
 	}
 
-	::EndDialog(m_hWnd, 0);
+	DestroyWindow();
 }
 
 LRESULT GameDialog::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -139,6 +139,34 @@ LRESULT GameDialog::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
 {
 	this->do_CloseWindow();
 	return 0;
+}
+
+
+bool GameDialog::PreProcessKeyboardMessage(MSG* msg) {
+	switch(msg->wParam) {
+	case VK_TAB:
+	case VK_DELETE:
+	case VK_RETURN:
+		{
+			// handled later
+		}break;
+	default:
+		{
+			return	false;
+		}break;
+	}
+
+	CComPtr<IDispatch> disp_doc;
+	if(FAILED(m_pWeb->get_Document(&disp_doc))) {
+		return	false;
+	}
+
+	CComQIPtr<IOleInPlaceActiveObject> spInPlace;  
+	if(FAILED(disp_doc->QueryInterface(__uuidof(IOleInPlaceActiveObject), (void**)&spInPlace))) {
+		return	false;
+	}
+
+	return	(spInPlace->TranslateAccelerator(msg) == S_OK); 
 }
 
 
