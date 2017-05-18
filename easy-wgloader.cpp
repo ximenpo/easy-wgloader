@@ -69,9 +69,11 @@ static	bool	Initialize(HINSTANCE hInstance)
 
 	//	first config(overide extend and normal)
 	if(::PathFileExistsA((cfg_dir + s_config_temp).c_str())){
-		std::ifstream	ifs(cfg_dir + s_config_temp);
-		if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
-			//	ignore errors ...
+		{
+			std::ifstream	ifs(cfg_dir + s_config_temp);
+			if(!ifs || !stringify_from_ini_stream(g_config, ifs)){
+				//	ignore errors ...
+			}
 		}
 
 		if(!g_param.debug) {
